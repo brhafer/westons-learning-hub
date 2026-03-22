@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Weston's Hub">
+<title>⭐ Weston's Learning Hub</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#FFF5E6;--white:#FFFFFF;--text:#2C2C2C;--muted:#888;
+  --orange:#FF6B35;--blue:#00B4D8;--green:#2DC653;--purple:#7B2FBE;
+  --pink:#E91E8C;--yellow:#FFD60A;--red:#E53935;--teal:#00897B;
+  --shadow:0 4px 20px rgba(0,0,0,0.10);--shadow-sm:0 2px 8px rgba(0,0,0,0.08);
+  --radius:20px;--radius-sm:12px;
+}
+body{font-family:-apple-system,'SF Pro Rounded','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);height:100dvh;overflow:hidden;display:flex;flex-direction:column;user-select:none;}
+
+/* HEADER */
+#app-header{background:linear-gradient(135deg,#FF6B35,#FF8E53);color:#fff;padding:12px 20px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 12px rgba(255,107,53,0.3);}
+#app-header .title-area h1{font-size:22px;font-weight:800;letter-spacing:-0.5px;}
+#app-header .title-area p{font-size:13px;opacity:0.85;margin-top:1px;}
+#star-badge{background:rgba(255,255,255,0.25);border-radius:50px;padding:8px 14px;display:flex;align-items:center;gap:6px;font-size:18px;font-weight:800;}
+#star-badge span{font-size:13px;font-weight:700;}
+
+/* MAIN CONTENT */
+#app-main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:16px 16px 12px;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* NAV */
+#app-nav{background:#fff;border-top:1px solid #eee;display:flex;flex-shrink:0;box-shadow:0 -2px 12px rgba(0,0,0,0.06);}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 10px;border:none;background:transparent;cursor:pointer;gap:2px;transition:all 0.15s;}
+.nav-btn .nav-icon{font-size:22px;transition:transform 0.15s;}
+.nav-btn .nav-label{font-size:10px;font-weight:600;color:#aaa;transition:color 0.15s;}
+.nav-btn.active .nav-label{color:var(--orange);}
+.nav-btn.active .nav-icon{transform:scale(1.15);}
+
+/* CARDS */
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:14px;}
+.section-title{font-size:20px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* ===== SCHEDULE SCREEN ===== */
+.day-banner{border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;color:#fff;display:flex;align-items:center;justify-content:space-between;}
+.day-banner .day-info h2{font-size:22px;font-weight:800;}
+.day-banner .day-info p{font-size:13px;opacity:0.85;margin-top:2px;}
+.day-banner .day-emoji{font-size:44px;}
+.schedule-block{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;transition:all 0.2s;position:relative;overflow:hidden;}
+.schedule-block.current{box-shadow:0 4px 24px rgba(0,0,0,0.12);transform:scale(1.01);}
+.schedule-block.current::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px;}
+.schedule-block.done{opacity:0.55;}
+.schedule-block .block-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.schedule-block .block-info{flex:1;min-width:0;}
+.schedule-block .block-time{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:2px;}
+.schedule-block .block-label{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.schedule-block .block-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.3;}
+.now-pill{background:var(--orange);color:#fff;font-size:10px;font-weight:800;border-radius:20px;padding:3px 8px;flex-shrink:0;animation:pulse 2s infinite;}
+.schedule-block .game-link-btn{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;margin-left:4px;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.7;}}
+
+/* ===== GAMES SCREEN ===== */
+.games-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.game-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px 14px;text-align:center;cursor:pointer;transition:all 0.15s;border:3px solid transparent;}
+.game-card:active{transform:scale(0.96);}
+.game-card .game-emoji{font-size:44px;margin-bottom:10px;display:block;}
+.game-card .game-name{font-size:15px;font-weight:800;margin-bottom:4px;}
+.game-card .game-desc{font-size:11px;color:var(--muted);line-height:1.3;}
+.game-card .game-stars{font-size:11px;font-weight:700;margin-top:8px;color:var(--yellow);}
+.game-stars-display{font-size:11px;font-weight:700;margin-top:8px;}
+
+/* ===== GAME OVERLAY ===== */
+#game-overlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column;}
+#game-overlay.active{display:flex;}
+.game-header{background:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-sm);flex-shrink:0;}
+.game-back-btn{background:none;border:none;font-size:28px;cursor:pointer;padding:0 4px;}
+.game-header-info{flex:1;}
+.game-header-info h2{font-size:18px;font-weight:800;}
+.game-header-info p{font-size:12px;color:var(--muted);}
+.game-progress-bar{height:8px;background:#f0f0f0;border-radius:4px;margin:14px 20px 0;overflow:hidden;}
+.game-progress-fill{height:100%;border-radius:4px;transition:width 0.4s ease;background:linear-gradient(90deg,var(--orange),var(--yellow));}
+.game-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;align-items:center;}
+.game-question{font-size:22px;font-weight:800;text-align:center;margin:16px 0;}
+.game-letter-display{font-size:100px;font-weight:900;width:150px;height:150px;border-radius:40px;display:flex;align-items:center;justify-content:center;color:#fff;margin:0 auto 20px;box-shadow:var(--shadow);}
+.letter-sub{display:block;font-size:28px;font-weight:700;opacity:0.7;margin-top:-10px;}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:360px;}
+.option-btn{background:#fff;border:3px solid #f0f0f0;border-radius:var(--radius);padding:20px 10px;font-size:50px;text-align:center;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--shadow-sm);}
+.option-btn .option-label{font-size:13px;font-weight:700;color:var(--text);}
+.option-btn:active{transform:scale(0.94);}
+.option-btn.correct{border-color:var(--green);background:#E8F5E9;animation:bounce 0.4s;}
+.option-btn.wrong{border-color:var(--red);background:#FFEBEE;animation:shake 0.4s;}
+@keyframes bounce{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+.score-display{font-size:16px;font-weight:700;color:var(--muted);text-align:center;margin-bottom:8px;}
+
+/* Number game specific */
+.emoji-count-area{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:300px;margin:0 auto 24px;min-height:120px;align-items:center;}
+.count-emoji{font-size:40px;animation:popIn 0.2s;}
+@keyframes popIn{from{transform:scale(0);}to{transform:scale(1);}}
+.number-options{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;max-width:360px;}
+.number-btn{background:#fff;border:3px solid #f0f0f0;border-radius:14px;padding:16px 6px;font-size:28px;font-weight:900;text-align:center;cursor:pointer;box-shadow:var(--shadow-sm);transition:all 0.15s;}
+.number-btn:active{transform:scale(0.92);}
+.number-btn.correct{border-color:var(--green);background:#E8F5E9;}
+.number-btn.wrong{border-color:var(--red);background:#FFEBEE;animation:shake 0.4s;}
+
+/* Sight words game */
+.sight-word-display{font-size:72px;font-weight:900;text-align:center;color:var(--purple);margin:10px 0 30px;letter-spacing:-2px;text-shadow:0 4px 16px rgba(123,47,190,0.2);}
+.word-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:360px;}
+.word-btn{background:#fff;border:3px solid #f0f0f0;border-radius:14px;padding:20px 10px;font-size:26px;font-weight:800;text-align:center;cursor:pointer;box-shadow:var(--shadow-sm);transition:all 0.15s;color:var(--purple);}
+.word-btn:active{transform:scale(0.94);}
+.word-btn.correct{border-color:var(--green);background:#E8F5E9;}
+.word-btn.wrong{border-color:var(--red);background:#FFEBEE;animation:shake 0.4s;}
+
+/* Shape game */
+.shape-display{width:140px;height:140px;display:flex;align-items:center;justify-content:center;margin:10px auto 20px;}
+.shape-svg{width:140px;height:140px;}
+.shape-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:360px;}
+.shape-btn{background:#fff;border:3px solid #f0f0f0;border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;box-shadow:var(--shadow-sm);transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.shape-btn svg{width:60px;height:60px;}
+.shape-btn .shape-name{font-size:13px;font-weight:700;}
+.shape-btn:active{transform:scale(0.94);}
+.shape-btn.correct{border-color:var(--green);background:#E8F5E9;}
+.shape-btn.wrong{border-color:var(--red);background:#FFEBEE;animation:shake 0.4s;}
+
+/* Color lab */
+.color-mixer{width:100%;max-width:380px;text-align:center;}
+.mixer-palette{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:10px 0 20px;}
+.color-swatch{width:72px;height:72px;border-radius:50%;cursor:pointer;border:4px solid transparent;transition:all 0.15s;box-shadow:var(--shadow-sm);}
+.color-swatch.selected{border-color:#333;transform:scale(1.1);}
+.color-swatch:active{transform:scale(0.94);}
+.mixer-equation{display:flex;align-items:center;justify-content:center;gap:12px;margin:16px 0;font-size:28px;font-weight:800;}
+.mixer-circle{width:64px;height:64px;border-radius:50%;border:3px solid #ddd;transition:all 0.4s;}
+.mix-btn{background:linear-gradient(135deg,var(--orange),var(--yellow));color:#fff;border:none;border-radius:50px;padding:14px 36px;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(255,107,53,0.3);transition:all 0.15s;margin:16px 0;}
+.mix-btn:active{transform:scale(0.95);}
+.mix-result{font-size:22px;font-weight:800;min-height:36px;margin-top:8px;}
+
+/* Win screen */
+.win-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px;flex:1;}
+.win-emoji{font-size:80px;animation:bigBounce 0.6s;}
+@keyframes bigBounce{0%{transform:scale(0);}60%{transform:scale(1.2);}100%{transform:scale(1);}}
+.win-title{font-size:32px;font-weight:900;margin:16px 0 8px;}
+.win-stars{font-size:48px;margin:10px 0;}
+.win-msg{font-size:16px;color:var(--muted);margin-bottom:28px;}
+.play-again-btn{background:linear-gradient(135deg,var(--orange),var(--yellow));color:#fff;border:none;border-radius:50px;padding:16px 40px;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(255,107,53,0.3);}
+
+/* ===== ACTIVITIES SCREEN ===== */
+.filter-tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;}
+.filter-tabs::-webkit-scrollbar{display:none;}
+.filter-tab{background:#fff;border:2px solid #eee;border-radius:50px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.15s;flex-shrink:0;}
+.filter-tab.active{border-color:var(--orange);background:var(--orange);color:#fff;}
+.activity-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;transition:all 0.2s;}
+.activity-card.completed{opacity:0.6;}
+.activity-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.activity-info{flex:1;min-width:0;}
+.activity-name{font-size:15px;font-weight:700;}
+.activity-time{font-size:12px;color:var(--muted);margin-top:2px;}
+.activity-desc{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.3;}
+.activity-check{width:40px;height:40px;border-radius:50%;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all 0.2s;font-size:18px;}
+.activity-check.done{background:var(--green);border-color:var(--green);color:#fff;}
+.activity-check.done::after{content:'✓';}
+.activity-check:not(.done)::after{content:'';}
+.no-activities{text-align:center;padding:40px 20px;color:var(--muted);}
+.no-activities .no-emoji{font-size:48px;margin-bottom:12px;}
+
+/* ===== PROGRESS SCREEN ===== */
+.stars-hero{background:linear-gradient(135deg,#FFD60A,#FF8E53);border-radius:var(--radius);padding:28px 20px;text-align:center;color:#fff;margin-bottom:16px;box-shadow:0 4px 20px rgba(255,214,10,0.3);}
+.stars-hero .big-star{font-size:64px;}
+.stars-hero .star-total{font-size:48px;font-weight:900;margin:4px 0;}
+.stars-hero .star-label{font-size:14px;opacity:0.85;font-weight:600;}
+.badges-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.badge-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px;text-align:center;}
+.badge-emoji{font-size:36px;margin-bottom:8px;}
+.badge-name{font-size:13px;font-weight:800;margin-bottom:4px;}
+.badge-desc{font-size:11px;color:var(--muted);}
+.badge-card.earned{border:2px solid var(--yellow);}
+.badge-card.locked{opacity:0.5;filter:grayscale(1);}
+.weekly-progress{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:16px;}
+.weekly-progress h3{font-size:16px;font-weight:800;margin-bottom:14px;}
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.progress-label{font-size:13px;font-weight:600;width:80px;flex-shrink:0;}
+.progress-bar-bg{flex:1;height:12px;background:#f0f0f0;border-radius:6px;overflow:hidden;}
+.progress-bar-fill{height:100%;border-radius:6px;transition:width 0.6s;}
+.progress-count{font-size:12px;font-weight:700;color:var(--muted);width:40px;text-align:right;}
+
+/* ===== PARENT SCREEN ===== */
+.pin-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;min-height:300px;}
+.pin-screen h2{font-size:24px;font-weight:800;margin-bottom:8px;}
+.pin-screen p{font-size:14px;color:var(--muted);margin-bottom:28px;text-align:center;}
+.pin-dots{display:flex;gap:12px;margin-bottom:24px;}
+.pin-dot{width:16px;height:16px;border-radius:50%;background:#e0e0e0;transition:background 0.15s;}
+.pin-dot.filled{background:var(--orange);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:240px;}
+.pin-key{background:#fff;border:2px solid #eee;border-radius:16px;padding:16px;font-size:22px;font-weight:800;text-align:center;cursor:pointer;box-shadow:var(--shadow-sm);transition:all 0.1s;}
+.pin-key:active{transform:scale(0.92);background:#f5f5f5;}
+.pin-error{color:var(--red);font-size:14px;font-weight:600;margin-top:8px;min-height:20px;}
+.parent-dashboard{display:none;}
+.parent-dashboard.visible{display:block;}
+.stat-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:12px;}
+.stat-card h3{font-size:15px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:14px;}
+.stat-row:last-child{border-bottom:none;}
+.stat-val{font-weight:700;color:var(--orange);}
+.prep-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f5f5f5;font-size:14px;}
+.prep-item:last-child{border-bottom:none;}
+.prep-check{width:28px;height:28px;border-radius:8px;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px;transition:all 0.15s;}
+.prep-check.done{background:var(--green);border-color:var(--green);color:#fff;}
+.reset-btn{background:#f5f5f5;color:var(--red);border:none;border-radius:50px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;width:100%;}
+.lock-btn{background:#f5f5f5;color:var(--muted);border:none;border-radius:50px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;width:100%;}
+
+/* CONFETTI */
+.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:200;}
+.confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall 1.2s ease-out forwards;}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+
+/* CELEBRATION OVERLAY */
+#celebration{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:150;display:none;align-items:center;justify-content:center;}
+#celebration.active{display:flex;}
+.celebration-card{background:#fff;border-radius:28px;padding:36px 28px;text-align:center;max-width:320px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.2);}
+.celebration-emoji{font-size:80px;animation:bigBounce 0.5s;}
+.celebration-title{font-size:26px;font-weight:900;margin:14px 0 6px;}
+.celebration-msg{font-size:15px;color:var(--muted);margin-bottom:20px;}
+.celebration-btn{background:linear-gradient(135deg,var(--orange),var(--yellow));color:#fff;border:none;border-radius:50px;padding:14px 36px;font-size:17px;font-weight:800;cursor:pointer;}
+
+/* Utility */
+.mt-8{margin-top:8px;}
+.mt-16{margin-top:16px;}
+.text-center{text-align:center;}
+.flex-center{display:flex;align-items:center;justify-content:center;}
+
+/* ===== NEW GAME STYLES ===== */
+
+/* Rhyme game */
+.rhyme-word-box{background:linear-gradient(135deg,#7B2FBE,#E91E8C);border-radius:24px;padding:20px;text-align:center;color:#fff;margin:10px 0 20px;width:170px;}
+.rhyme-word-box .rhyme-emoji{font-size:60px;display:block;line-height:1.1;}
+.rhyme-word-box .rhyme-word{font-size:30px;font-weight:900;letter-spacing:3px;margin-top:8px;}
+
+/* Animal sounds */
+.animal-display-box{font-size:96px;text-align:center;margin:8px 0 10px;line-height:1;}
+.animal-name-label{font-size:22px;font-weight:800;text-align:center;margin-bottom:18px;color:var(--text);}
+.sound-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:360px;}
+.sound-btn{background:#fff;border:3px solid #f0f0f0;border-radius:16px;padding:16px 10px;font-size:19px;font-weight:800;text-align:center;cursor:pointer;box-shadow:var(--shadow-sm);transition:all 0.15s;}
+.sound-btn:active{transform:scale(0.94);}
+.sound-btn.correct{border-color:var(--green);background:#E8F5E9;animation:bounce 0.4s;}
+.sound-btn.wrong{border-color:var(--red);background:#FFEBEE;animation:shake 0.4s;}
+
+/* Pattern game */
+.pattern-row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:10px 0 22px;}
+.pattern-dot{width:50px;height:50px;border-radius:50%;box-shadow:var(--shadow-sm);font-size:34px;display:flex;align-items:center;justify-content:center;}
+.pattern-blank{width:50px;height:50px;border-radius:50%;border:4px dashed #ccc;background:#f9f9f9;display:flex;align-items:center;justify-content:center;font-size:20px;color:#bbb;font-weight:900;}
+.pattern-options{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+.pattern-opt-btn{width:62px;height:62px;border-radius:50%;border:4px solid transparent;cursor:pointer;box-shadow:var(--shadow-sm);transition:all 0.15s;font-size:38px;display:flex;align-items:center;justify-content:center;background:#fff;}
+.pattern-opt-btn:active{transform:scale(0.94);}
+.pattern-opt-btn.correct{border-color:var(--green)!important;box-shadow:0 0 12px rgba(45,198,83,0.4);}
+.pattern-opt-btn.wrong{animation:shake 0.4s;}
+
+/* Word builder */
+.word-display{display:flex;gap:8px;justify-content:center;align-items:center;margin:14px 0 6px;}
+.word-tile{width:56px;height:66px;border-radius:14px;background:#fff;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:var(--purple);}
+.word-blank-tile{width:56px;height:66px;border-radius:14px;border:4px dashed var(--orange);background:#FFF8F0;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:var(--orange);}
+.word-hint-emoji{font-size:52px;text-align:center;margin:6px 0 14px;display:block;}
+.letter-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:280px;}
+.letter-choice-btn{background:#fff;border:3px solid #f0f0f0;border-radius:14px;padding:18px;font-size:30px;font-weight:900;text-align:center;cursor:pointer;box-shadow:var(--shadow-sm);color:var(--purple);transition:all 0.15s;}
+.letter-choice-btn:active{transform:scale(0.94);}
+.letter-choice-btn.correct{border-color:var(--green);background:#E8F5E9;animation:bounce 0.4s;}
+.letter-choice-btn.wrong{border-color:var(--red);background:#FFEBEE;animation:shake 0.4s;}
+
+/* Memory match */
+.memory-meta{display:flex;gap:20px;justify-content:center;font-size:14px;font-weight:700;color:var(--muted);margin-bottom:10px;}
+.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:380px;}
+.mem-card{height:76px;cursor:pointer;perspective:600px;}
+.mem-card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 0.35s;}
+.mem-card.flipped .mem-card-inner,.mem-card.matched .mem-card-inner{transform:rotateY(180deg);}
+.mem-front,.mem-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:14px;display:flex;align-items:center;justify-content:center;}
+.mem-front{background:linear-gradient(135deg,var(--blue),var(--purple));font-size:24px;font-weight:900;color:#fff;}
+.mem-back{background:#fff;border:3px solid #f0f0f0;font-size:30px;transform:rotateY(180deg);box-shadow:var(--shadow-sm);}
+.mem-card.matched .mem-back{border-color:var(--green);background:#E8F5E9;}
+
+/* Bigger or Smaller */
+.compare-question{font-size:20px;font-weight:800;text-align:center;margin:8px 0 20px;}
+.compare-wrap{display:flex;gap:16px;align-items:center;justify-content:center;width:100%;max-width:360px;}
+.compare-btn{width:120px;height:110px;border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:48px;font-weight:900;color:#fff;cursor:pointer;box-shadow:var(--shadow);transition:all 0.15s;border:none;gap:4px;}
+.compare-btn:active{transform:scale(0.94);}
+.compare-btn .compare-label{font-size:12px;font-weight:700;opacity:0.85;}
+.compare-vs{font-size:22px;font-weight:900;color:var(--muted);}
+.compare-btn.correct{animation:bounce 0.4s;}
+.compare-btn.wrong{animation:shake 0.4s;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="app-header">
+  <div class="title-area">
+    <h1>⭐ Weston's Hub</h1>
+    <p id="header-greeting">Loading...</p>
+  </div>
+  <div id="star-badge"><span>⭐</span><span id="star-count">0</span></div>
+</header>
+
+<!-- MAIN -->
+<main id="app-main">
+
+  <!-- SCHEDULE SCREEN -->
+  <section id="screen-schedule" class="screen">
+    <div id="schedule-content"></div>
+  </section>
+
+  <!-- GAMES SCREEN -->
+  <section id="screen-games" class="screen">
+    <div class="section-title">🎮 Choose a Game!</div>
+    <div class="games-grid" id="games-grid"></div>
+  </section>
+
+  <!-- ACTIVITIES SCREEN -->
+  <section id="screen-activities" class="screen">
+    <div class="section-title">🎨 Activity Library</div>
+    <div class="filter-tabs" id="filter-tabs">
+      <button class="filter-tab active" onclick="filterActivities('all')">All 32</button>
+      <button class="filter-tab" onclick="filterActivities('literacy')">📚 Literacy</button>
+      <button class="filter-tab" onclick="filterActivities('math')">🔢 Math</button>
+      <button class="filter-tab" onclick="filterActivities('arts')">🎨 Arts</button>
+      <button class="filter-tab" onclick="filterActivities('physical')">⚽ Physical</button>
+      <button class="filter-tab" onclick="filterActivities('sibling')">👦 Sibling</button>
+    </div>
+    <div id="activities-list"></div>
+  </section>
+
+  <!-- PROGRESS SCREEN -->
+  <section id="screen-progress" class="screen">
+    <div class="stars-hero">
+      <div class="big-star">⭐</div>
+      <div class="star-total" id="progress-star-total">0</div>
+      <div class="star-label">Total Stars Earned</div>
+    </div>
+    <div class="weekly-progress">
+      <h3>📊 This Week's Progress</h3>
+      <div class="progress-row">
+        <div class="progress-label">📚 Literacy</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-literacy" style="width:0%;background:var(--blue)"></div></div>
+        <div class="progress-count" id="prog-literacy-count">0/8</div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label">🔢 Math</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-math" style="width:0%;background:var(--purple)"></div></div>
+        <div class="progress-count" id="prog-math-count">0/8</div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label">🎨 Arts</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-arts" style="width:0%;background:var(--pink)"></div></div>
+        <div class="progress-count" id="prog-arts-count">0/8</div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label">⚽ Physical</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-physical" style="width:0%;background:var(--green)"></div></div>
+        <div class="progress-count" id="prog-physical-count">0/8</div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label">🎮 Games</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-games" style="width:0%;background:var(--orange)"></div></div>
+        <div class="progress-count" id="prog-games-count">0/6</div>
+      </div>
+    </div>
+    <div class="section-title">🏅 Achievements</div>
+    <div class="badges-grid" id="badges-grid"></div>
+  </section>
+
+  <!-- PARENT SCREEN -->
+  <section id="screen-parent" class="screen">
+    <div class="section-title">👨‍👩‍👦 Parent Dashboard</div>
+    <!-- PIN Entry -->
+    <div id="pin-entry" class="card pin-screen">
+      <div style="font-size:52px;margin-bottom:12px;">🔒</div>
+      <h2>Parent Area</h2>
+      <p>Enter your 4-digit PIN to view the parent dashboard</p>
+      <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot" id="dot-0"></div>
+        <div class="pin-dot" id="dot-1"></div>
+        <div class="pin-dot" id="dot-2"></div>
+        <div class="pin-dot" id="dot-3"></div>
+      </div>
+      <div class="pin-pad">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key" onclick="pinClear()" style="font-size:14px;color:var(--muted)">Clear</button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key" onclick="pinBackspace()" style="font-size:18px;">⌫</button>
+      </div>
+      <div class="pin-error" id="pin-error"></div>
+    </div>
+    <!-- Dashboard (hidden until PIN) -->
+    <div id="parent-dashboard" class="parent-dashboard">
+      <div class="stat-card">
+        <h3>📈 Weekly Summary</h3>
+        <div id="parent-stats"></div>
+      </div>
+      <div class="stat-card">
+        <h3>🎮 Games Played</h3>
+        <div id="parent-games"></div>
+      </div>
+      <div class="stat-card">
+        <h3>📋 Nightly Prep Checklist</h3>
+        <div id="prep-list"></div>
+      </div>
+      <div class="stat-card">
+        <h3>⚙️ Settings</h3>
+        <div class="stat-row">
+          <span>Parent PIN</span><span class="stat-val">1234</span>
+        </div>
+        <div class="stat-row">
+          <span>Total Stars Earned</span><span class="stat-val" id="parent-total-stars">0</span>
+        </div>
+      </div>
+      <button class="reset-btn" onclick="confirmReset()">🔄 Reset All Progress</button>
+      <button class="lock-btn" onclick="lockParent()">🔒 Lock Parent Area</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<nav id="app-nav">
+  <button class="nav-btn active" id="nav-schedule" onclick="navigate('schedule')">
+    <span class="nav-icon">📅</span><span class="nav-label">Today</span>
+  </button>
+  <button class="nav-btn" id="nav-games" onclick="navigate('games')">
+    <span class="nav-icon">🎮</span><span class="nav-label">Games</span>
+  </button>
+  <button class="nav-btn" id="nav-activities" onclick="navigate('activities')">
+    <span class="nav-icon">🎨</span><span class="nav-label">Activities</span>
+  </button>
+  <button class="nav-btn" id="nav-progress" onclick="navigate('progress')">
+    <span class="nav-icon">⭐</span><span class="nav-label">My Stars</span>
+  </button>
+  <button class="nav-btn" id="nav-parent" onclick="navigate('parent')">
+    <span class="nav-icon">👪</span><span class="nav-label">Parent</span>
+  </button>
+</nav>
+
+<!-- GAME OVERLAY -->
+<div id="game-overlay">
+  <div class="game-header">
+    <button class="game-back-btn" onclick="exitGame()">←</button>
+    <div class="game-header-info">
+      <h2 id="game-title">Game</h2>
+      <p id="game-subtitle">Round 1 of 10</p>
+    </div>
+    <div id="game-live-score" style="font-size:16px;font-weight:800;color:var(--yellow)">⭐ 0</div>
+  </div>
+  <div class="game-progress-bar"><div class="game-progress-fill" id="game-progress-fill" style="width:0%"></div></div>
+  <div class="game-body" id="game-body"></div>
+</div>
+
+<!-- CONFETTI CONTAINER -->
+<div class="confetti-container" id="confetti-container"></div>
+
+<!-- CELEBRATION OVERLAY -->
+<div id="celebration">
+  <div class="celebration-card">
+    <div class="celebration-emoji" id="cel-emoji">🎉</div>
+    <div class="celebration-title" id="cel-title">Amazing!</div>
+    <div class="celebration-msg" id="cel-msg">You did it!</div>
+    <button class="celebration-btn" id="cel-btn" onclick="closeCelebration()">Awesome! ⭐</button>
+  </div>
+</div>
+
+<script>
+// ===================================================
+// DATA
+// ===================================================
+
+const SCHEDULE_MWF = [
+  {time:'11:30 AM',end:'12:00',icon:'🥪',label:'Lunch Time!',desc:"Welcome home! Wash hands and enjoy lunch.",color:'#FF6B35',mins:30},
+  {time:'12:00 PM',end:'12:30',icon:'📚',label:'Literacy Time',desc:'Phonics, sight words, or letter tracing',color:'#00B4D8',mins:30,game:'abc'},
+  {time:'12:30 PM',end:'13:00',icon:'🔢',label:'Math Time',desc:'Counting games, puzzles, or number sorting',color:'#7B2FBE',mins:30,game:'numbers'},
+  {time:'1:00 PM',end:'13:45',icon:'🎨',label:'Arts & Crafts',desc:'Painting, playdough, collage, and more!',color:'#E91E8C',mins:45},
+  {time:'1:45 PM',end:'14:30',icon:'⚽',label:'Outdoor Play',desc:'Backyard, chalk, bike ride, or nature walk!',color:'#2DC653',mins:45},
+  {time:'2:30 PM',end:'15:00',icon:'😴',label:'Quiet Time',desc:'Audiobook, puzzles, or LEGOs (Mom\'s work time!)',color:'#78909C',mins:30},
+  {time:'3:00 PM',end:'16:00',icon:'👦',label:'Brother Time!',desc:'Board games, building, backyard sports!',color:'#FFC107',mins:60},
+  {time:'4:00 PM',end:'17:00',icon:'🆓',label:'Free Play',desc:'Unstructured play or learning app time',color:'#26A69A',mins:60},
+  {time:'5:00 PM',end:'18:00',icon:'🍽️',label:'Dinner Time!',desc:'Mom is done — family dinner and evening!',color:'#FF6B35',mins:60},
+];
+
+const SCHEDULE_TUTH = [
+  {time:'7:30 AM',end:'08:15',icon:'🥞',label:'Breakfast',desc:'Quick phonics or counting game before school!',color:'#FF6B35',mins:45,game:'abc'},
+  {time:'8:15 AM',end:'15:00',icon:'🏫',label:'Preschool → Daycare',desc:'Learning at school and having fun at daycare!',color:'#00B4D8',mins:405},
+  {time:'5:00 PM',end:'17:30',icon:'📖',label:'Evening Reading',desc:'Reading together — a reconnection ritual!',color:'#7B2FBE',mins:30},
+  {time:'5:30 PM',end:'18:30',icon:'👦',label:'Sibling Time!',desc:'Quality time with brother after school',color:'#FFC107',mins:60},
+  {time:'6:30 PM',end:'19:30',icon:'🍽️',label:'Dinner & Bedtime',desc:'Family dinner and evening routine',color:'#2DC653',mins:60},
+];
+
+const SCHEDULE_WEEKEND = [
+  {time:'Morning',end:'',icon:'🥞',label:'Family Breakfast',desc:'Breakfast time together!',color:'#FF6B35'},
+  {time:'Mid-Morning',end:'',icon:'🌳',label:'Outdoor Family Time',desc:'Park, backyard, bike ride, or outing',color:'#2DC653'},
+  {time:'Afternoon',end:'',icon:'🎲',label:'Family Activities',desc:'Math game, art project, or reading together',color:'#7B2FBE'},
+  {time:'Late Afternoon',end:'',icon:'👦',label:'Sibling Play',desc:'Brother and Weston free play time',color:'#FFC107'},
+  {time:'Evening',end:'',icon:'🍽️',label:'Family Dinner',desc:'Dinner and bedtime routine',color:'#FF6B35'},
+];
+
+const ACTIVITIES = [
+  // LITERACY
+  {id:'a1',cat:'literacy',icon:'🎣',name:'Alphabet Fishing',time:'15 min',desc:'Write letters on paper fish, catch with magnet rod. Name letter + sound.',materials:'Paper, markers, magnet, paperclips'},
+  {id:'a2',cat:'literacy',icon:'🔍',name:'Sight Word Hunt',time:'20 min',desc:'Hide sight word cards around the house. Find and read aloud!',materials:'Index cards with sight words'},
+  {id:'a3',cat:'literacy',icon:'📖',name:'Story Retelling',time:'20 min',desc:'Read a book, then Weston retells it in drawings.',materials:'Library book, paper, crayons'},
+  {id:'a4',cat:'literacy',icon:'✏️',name:'Letter Tracing Tray',time:'15 min',desc:'Trace letters in a salt or sand tray with a finger.',materials:'Tray, salt or sand'},
+  {id:'a5',cat:'literacy',icon:'📚',name:'My Little Library',time:'30 min',desc:"Weston 'reads' from a personal shelf of 5–7 books.",materials:'Age-appropriate picture books'},
+  {id:'a6',cat:'literacy',icon:'🎵',name:'Rhyme Time',time:'10 min',desc:'Say a word, Weston finds a rhyme. Cat → hat → sat!',materials:'None needed'},
+  {id:'a7',cat:'literacy',icon:'🖊️',name:'Name Practice',time:'10 min',desc:'Practice writing first and last name with dotted letter guides.',materials:'Pencil, lined paper'},
+  {id:'a8',cat:'literacy',icon:'🏀',name:'ABC Hopscotch',time:'20 min',desc:'Chalk hopscotch with letters outside. Hop and call out each letter!',materials:'Chalk, outdoor space'},
+  // MATH
+  {id:'b1',cat:'math',icon:'🐟',name:'Counting Snacks',time:'10 min',desc:'Count goldfish crackers by 1s, then 2s. Eat the answer!',materials:'Snack items'},
+  {id:'b2',cat:'math',icon:'🔷',name:'Shape Scavenger Hunt',time:'15 min',desc:'Find circles, squares, triangles around the house.',materials:'None (or camera)'},
+  {id:'b3',cat:'math',icon:'🧩',name:'Number Puzzles',time:'20 min',desc:'Foam or wooden number puzzles, or DIY matching cards.',materials:'Number puzzle or index cards'},
+  {id:'b4',cat:'math',icon:'🧱',name:'Block Patterns',time:'20 min',desc:'Build color patterns with blocks: red-blue-red-blue. What comes next?',materials:'Building blocks or LEGOs'},
+  {id:'b5',cat:'math',icon:'📏',name:'Measure It!',time:'20 min',desc:'Measure objects with hands, feet, or a ruler.',materials:'Ruler or measuring tape'},
+  {id:'b6',cat:'math',icon:'🔵',name:'Dot-to-Dot',time:'15 min',desc:'Printable dot-to-dot sheets reinforce number order.',materials:'Printed dot-to-dot pages, pencil'},
+  {id:'b7',cat:'math',icon:'📅',name:'Calendar Math',time:'10 min',desc:'Mark the calendar daily. Count days till the weekend!',materials:'Calendar (print or whiteboard)'},
+  {id:'b8',cat:'math',icon:'🗂️',name:'Sort & Count',time:'15 min',desc:'Sort mixed items by color, size, or shape. Count each group.',materials:'Mixed household items'},
+  // ARTS
+  {id:'c1',cat:'arts',icon:'🎨',name:'Watercolor Paintings',time:'30 min',desc:'Open-ended watercolor painting with weekly themes.',materials:'Watercolor set, paper, brush'},
+  {id:'c2',cat:'arts',icon:'🍽️',name:'Paper Plate Art',time:'25 min',desc:'Turn plates into animals, planets, or funny faces.',materials:'Paper plates, paint, googly eyes, glue'},
+  {id:'c3',cat:'arts',icon:'🟡',name:'Playdough Sculpting',time:'30 min',desc:'Roll, cut, build. Give a prompt or let him create freely!',materials:'Playdough'},
+  {id:'c4',cat:'arts',icon:'🌈',name:'Tissue Paper Collage',time:'25 min',desc:'Tear colorful tissue paper, glue to cardstock.',materials:'Tissue paper, cardstock, glue'},
+  {id:'c5',cat:'arts',icon:'🍂',name:'Nature Art',time:'30 min',desc:'Collect leaves, sticks, rocks outside — glue for nature scenes.',materials:'Outdoor treasures, paper, glue'},
+  {id:'c6',cat:'arts',icon:'🏗️',name:'Craft Stick Creations',time:'30 min',desc:'Build houses, frames, or animals with craft sticks.',materials:'Craft sticks, white glue, paint'},
+  {id:'c7',cat:'arts',icon:'🖼️',name:'Printmaking',time:'20 min',desc:'Stamp cut potato, sponge, or bubble wrap in paint onto paper.',materials:'Potato/sponge/bubble wrap, paint, paper'},
+  {id:'c8',cat:'arts',icon:'🔴',name:'Color Mixing Experiment',time:'20 min',desc:'Mix primary paint or food coloring to discover new colors!',materials:'Paint or food coloring, water, cups'},
+  // PHYSICAL
+  {id:'d1',cat:'physical',icon:'🏃',name:'Obstacle Course',time:'30 min',desc:'Set up cushions, hula hoops, tape lines in backyard or living room.',materials:'Cushions, tape, hula hoops'},
+  {id:'d2',cat:'physical',icon:'🖍️',name:'Backyard Chalk Art',time:'30 min',desc:"Draw hopscotch, roads for toy cars, or trace each other's outlines!",materials:'Sidewalk chalk'},
+  {id:'d3',cat:'physical',icon:'🐸',name:'Animal Walk Relay',time:'15 min',desc:'Bear crawl, frog jump, crab walk across the yard.',materials:'Outdoor or large indoor space'},
+  {id:'d4',cat:'physical',icon:'⚽',name:'Ball Skills Practice',time:'20 min',desc:'Rolling, throwing, catching, and kicking a ball.',materials:'Ball of any size'},
+  {id:'d5',cat:'physical',icon:'🌿',name:'Nature Walk & Collection',time:'30 min',desc:'Walk around the neighborhood collecting rocks, leaves, or sticks.',materials:'Small bag or bucket'},
+  {id:'d6',cat:'physical',icon:'💃',name:'Dance Party',time:'15 min',desc:"Play Weston's favorite songs and have a dance break!",materials:'Music speaker'},
+  {id:'d7',cat:'physical',icon:'🫧',name:'Bubble Chase',time:'15 min',desc:'Blow bubbles and chase and pop them. Fun and active!',materials:'Bubbles'},
+  {id:'d8',cat:'physical',icon:'🧊',name:'Freeze Tag',time:'20 min',desc:'When music stops, freeze! Great with brother too.',materials:'Music, open space'},
+  // SIBLING
+  {id:'e1',cat:'sibling',icon:'🎲',name:'Board & Card Games',time:'30-45 min',desc:'Spot It Jr., Uno, Zingo, Hi Ho Cherry-O — great for both ages!',materials:'Board games'},
+  {id:'e2',cat:'sibling',icon:'🧱',name:'LEGO / Building Blocks',time:'30-45 min',desc:'Each builds their own or they collaborate on a big project together.',materials:'LEGOs or building blocks'},
+  {id:'e3',cat:'sibling',icon:'🧪',name:'Science Experiments',time:'30 min',desc:'Vinegar and baking soda, sink or float, slime — big brother can lead!',materials:'Household science materials'},
+  {id:'e4',cat:'sibling',icon:'🏈',name:'Outdoor Sports',time:'30 min',desc:'Kickball, catch, tag, obstacle course — brother models physical play.',materials:'Balls, outdoor space'},
+  {id:'e5',cat:'sibling',icon:'📖',name:'Read Together',time:'20 min',desc:'Older brother reads to Weston, or they listen to an audiobook side-by-side.',materials:'Books or audiobook'},
+  {id:'e6',cat:'sibling',icon:'🏰',name:'Dramatic Play',time:'30 min',desc:'Build a fort, act out stories, or create a pretend restaurant or store.',materials:'Pillows, blankets, props'},
+  {id:'e7',cat:'sibling',icon:'🖌️',name:'Art Collaboration',time:'30 min',desc:'Paint or draw a mural together on a large sheet of paper or poster board.',materials:'Paper, paints, markers'},
+  {id:'e8',cat:'sibling',icon:'🧩',name:'Puzzle Challenge',time:'20-30 min',desc:'A 4–6 year level puzzle both can solve together — great teamwork!',materials:'Jigsaw puzzle'},
+];
+
+const PREP_ITEMS = [
+  {id:'p1',text:'Set out craft materials (paints, paper, scissors, glue at the art table)'},
+  {id:'p2',text:'Print worksheets / activity pages (dot-to-dot, tracing, coloring pages)'},
+  {id:'p3',text:"Rotate Weston's book shelf (choose 5–7 picture books for the week)"},
+  {id:'p4',text:'Choose sibling activity (for when brother gets home at 3 PM)'},
+  {id:'p5',text:'Charge tablet/device (make sure apps are ready to go)'},
+  {id:'p6',text:"Stock the snack shelf (easy self-serve snack for Weston's 2:30 PM break)"},
+  {id:'p7',text:'Set up outdoor activity (pump up ball, get chalk ready, plan walk route)'},
+  {id:'p8',text:"Review tomorrow's learning theme (what letter/number/concept to focus on?)"},
+];
+
+const LETTER_DATA = [
+  {letter:'A',emoji:'🍎',name:'Apple',distractors:['🐝','🐱','🦆']},
+  {letter:'B',emoji:'🐝',name:'Bee',distractors:['🍎','🐱','🦆']},
+  {letter:'C',emoji:'🐱',name:'Cat',distractors:['🍎','🐝','🦆']},
+  {letter:'D',emoji:'🦆',name:'Duck',distractors:['🍎','🐝','🐱']},
+  {letter:'E',emoji:'🐘',name:'Elephant',distractors:['🦒','🦁','🐅']},
+  {letter:'F',emoji:'🐟',name:'Fish',distractors:['🐱','🐶','🐸']},
+  {letter:'G',emoji:'🦒',name:'Giraffe',distractors:['🐘','🦁','🐅']},
+  {letter:'H',emoji:'🐴',name:'Horse',distractors:['🦒','🐮','🐑']},
+  {letter:'I',emoji:'🍦',name:'Ice Cream',distractors:['🍕','🍰','🍩']},
+  {letter:'J',emoji:'🃏',name:'Joker Card',distractors:['🍎','🐝','🐱']},
+  {letter:'K',emoji:'🪁',name:'Kite',distractors:['🌙','⭐','🎈']},
+  {letter:'L',emoji:'🦁',name:'Lion',distractors:['🐯','🐻','🦊']},
+  {letter:'M',emoji:'🌙',name:'Moon',distractors:['⭐','☀️','🌈']},
+  {letter:'N',emoji:'🪺',name:'Nest',distractors:['🌻','🌺','🍄']},
+  {letter:'O',emoji:'🐙',name:'Octopus',distractors:['🦈','🐬','🐠']},
+  {letter:'P',emoji:'🐷',name:'Pig',distractors:['🐮','🐑','🐔']},
+  {letter:'Q',emoji:'👸',name:'Queen',distractors:['👑','💎','🔮']},
+  {letter:'R',emoji:'🌈',name:'Rainbow',distractors:['☀️','🌙','⭐']},
+  {letter:'S',emoji:'⭐',name:'Star',distractors:['🌙','☀️','🌈']},
+  {letter:'T',emoji:'🐯',name:'Tiger',distractors:['🦁','🐻','🦊']},
+  {letter:'U',emoji:'☂️',name:'Umbrella',distractors:['🎩','🎀','🎁']},
+  {letter:'V',emoji:'🎻',name:'Violin',distractors:['🎸','🎹','🎺']},
+  {letter:'W',emoji:'🐳',name:'Whale',distractors:['🦈','🐬','🐠']},
+  {letter:'Y',emoji:'🧶',name:'Yarn',distractors:['🎀','🎁','🎈']},
+  {letter:'Z',emoji:'🦓',name:'Zebra',distractors:['🦒','🐴','🦁']},
+];
+
+const SIGHT_WORDS = ['the','and','is','in','it','at','he','she','we','go','to','can','see','up','on','my','like','come','said','you','look','big','run','for','play','make','one','two','not','get','has','his','they','was','are','do','did','all','but','had'];
+
+const SHAPES = [
+  {name:'Circle',color:'#FF6B35',svg:'<circle cx="60" cy="60" r="50" fill="FILL"/>'},
+  {name:'Square',color:'#00B4D8',svg:'<rect x="10" y="10" width="100" height="100" rx="4" fill="FILL"/>'},
+  {name:'Triangle',color:'#2DC653',svg:'<polygon points="60,5 115,115 5,115" fill="FILL"/>'},
+  {name:'Rectangle',color:'#7B2FBE',svg:'<rect x="5" y="30" width="110" height="60" rx="4" fill="FILL"/>'},
+  {name:'Star',color:'#FFD60A',svg:'<polygon points="60,5 74,40 112,40 82,62 95,99 60,78 25,99 38,62 8,40 46,40" fill="FILL"/>'},
+  {name:'Heart',color:'#E91E8C',svg:'<path d="M60,95 C20,70 5,45 5,32 C5,18 18,8 32,8 C42,8 52,14 60,22 C68,14 78,8 88,8 C102,8 115,18 115,32 C115,45 100,70 60,95Z" fill="FILL"/>'},
+  {name:'Diamond',color:'#FF6B35',svg:'<polygon points="60,5 115,60 60,115 5,60" fill="FILL"/>'},
+  {name:'Oval',color:'#00B4D8',svg:'<ellipse cx="60" cy="60" rx="55" ry="35" fill="FILL"/>'},
+];
+
+const COLORS_DATA = [
+  {name:'Red',hex:'#E53935'},
+  {name:'Blue',hex:'#1565C0'},
+  {name:'Yellow',hex:'#F9A825'},
+  {name:'Green',hex:'#2E7D32'},
+  {name:'Orange',hex:'#E65100'},
+  {name:'Purple',hex:'#6A1B9A'},
+  {name:'Pink',hex:'#C2185B'},
+  {name:'White',hex:'#F5F5F5'},
+];
+
+const COLOR_MIXES = {
+  'Red+Blue':'Purple','Blue+Red':'Purple',
+  'Red+Yellow':'Orange','Yellow+Red':'Orange',
+  'Blue+Yellow':'Green','Yellow+Blue':'Green',
+  'Red+White':'Pink','White+Red':'Pink',
+  'Red+Green':'Brown','Green+Red':'Brown',
+  'Blue+White':'Light Blue','White+Blue':'Light Blue',
+  'Yellow+White':'Light Yellow','White+Yellow':'Light Yellow',
+  'Red+Blue+Yellow':'Brown',
+};
+const COLOR_MIX_RESULTS = {
+  'Purple':'#6A1B9A','Orange':'#E65100','Green':'#2E7D32',
+  'Pink':'#C2185B','Brown':'#5D4037','Light Blue':'#64B5F6',
+  'Light Yellow':'#FFF176',
+};
+
+// ── NEW GAME DATA ──────────────────────────────────────
+const RHYME_DATA = [
+  {word:'CAT',emoji:'🐱',rhyme:'🎩',rhymeName:'Hat',distractors:['🍎','🌙','🚀']},
+  {word:'BEE',emoji:'🐝',rhyme:'🌳',rhymeName:'Tree',distractors:['🎈','⭐','🍕']},
+  {word:'FROG',emoji:'🐸',rhyme:'🐕',rhymeName:'Dog',distractors:['🌸','✏️','🎸']},
+  {word:'CAKE',emoji:'🎂',rhyme:'🐍',rhymeName:'Snake',distractors:['🌙','🎵','🦁']},
+  {word:'STAR',emoji:'⭐',rhyme:'🚗',rhymeName:'Car',distractors:['🎩','🍦','🐧']},
+  {word:'BALL',emoji:'⚽',rhyme:'🌅',rhymeName:'Wall',distractors:['🐝','🦊','🎪']},
+  {word:'FISH',emoji:'🐟',rhyme:'🍽️',rhymeName:'Dish',distractors:['🌻','🐘','🎯']},
+  {word:'RAIN',emoji:'🌧️',rhyme:'🚂',rhymeName:'Train',distractors:['🎂','🐸','🏠']},
+];
+const ANIMAL_SOUNDS = [
+  {animal:'🐱',name:'Cat',sound:'Meow',distractors:['Woof','Moo','Oink']},
+  {animal:'🐕',name:'Dog',sound:'Woof',distractors:['Meow','Moo','Baa']},
+  {animal:'🐄',name:'Cow',sound:'Moo',distractors:['Oink','Woof','Neigh']},
+  {animal:'🐷',name:'Pig',sound:'Oink',distractors:['Moo','Meow','Quack']},
+  {animal:'🐸',name:'Frog',sound:'Ribbit',distractors:['Woof','Moo','Meow']},
+  {animal:'🐔',name:'Chicken',sound:'Cluck',distractors:['Moo','Woof','Oink']},
+  {animal:'🦆',name:'Duck',sound:'Quack',distractors:['Meow','Moo','Oink']},
+  {animal:'🐑',name:'Sheep',sound:'Baa',distractors:['Woof','Moo','Oink']},
+  {animal:'🐴',name:'Horse',sound:'Neigh',distractors:['Moo','Oink','Woof']},
+  {animal:'🦁',name:'Lion',sound:'Roar',distractors:['Meow','Woof','Moo']},
+];
+const PATTERNS = [
+  {seq:['🔴','🔵','🔴','🔵'],answer:'🔴'},
+  {seq:['🌟','🌙','🌟','🌙'],answer:'🌟'},
+  {seq:['🐱','🐶','🐱','🐶'],answer:'🐱'},
+  {seq:['🔺','🔺','🔵','🔺','🔺'],answer:'🔵'},
+  {seq:['🍎','🍊','🍋','🍎','🍊'],answer:'🍋'},
+  {seq:['⭐','⭐','💫','⭐','⭐'],answer:'💫'},
+  {seq:['🟢','🟡','🟢','🟡'],answer:'🟢'},
+  {seq:['🦋','🌸','🌸','🦋','🌸'],answer:'🌸'},
+];
+const CVC_WORDS = [
+  {word:'CAT',blank:1,letters:['A','O','U','E'],answer:'A'},
+  {word:'DOG',blank:1,letters:['A','O','I','E'],answer:'O'},
+  {word:'PIG',blank:1,letters:['A','I','U','O'],answer:'I'},
+  {word:'BUS',blank:1,letters:['A','O','U','I'],answer:'U'},
+  {word:'HEN',blank:1,letters:['A','E','I','O'],answer:'E'},
+  {word:'SUN',blank:1,letters:['A','O','U','I'],answer:'U'},
+  {word:'BIG',blank:1,letters:['A','I','O','E'],answer:'I'},
+  {word:'MAP',blank:1,letters:['A','O','U','E'],answer:'A'},
+  {word:'CUP',blank:1,letters:['A','O','U','I'],answer:'U'},
+  {word:'JET',blank:1,letters:['A','E','I','O'],answer:'E'},
+];
+const MEMORY_PAIRS = ['🐱','🐶','🐸','🦋','🌟','⭐','🎈','🍎'];
+
+const GAMES_LIST = [
+  {id:'abc',icon:'🔤',name:'ABC Adventure',desc:'Match letters to pictures!',color:'#00B4D8',stars:3},
+  {id:'numbers',icon:'🔢',name:'Number World',desc:'Count and find the right number!',color:'#7B2FBE',stars:3},
+  {id:'sightwords',icon:'👁️',name:'Sight Words',desc:'Read and match the words!',color:'#E91E8C',stars:3},
+  {id:'shapes',icon:'🔷',name:'Shape World',desc:'Identify all the shapes!',color:'#2DC653',stars:3},
+  {id:'colors',icon:'🎨',name:'Color Lab',desc:'Mix colors and make new ones!',color:'#FF6B35',stars:3},
+  {id:'counting',icon:'➕',name:'Math Stars',desc:'Count groups and add numbers!',color:'#FFD60A',stars:3},
+  {id:'rhyme',icon:'🎵',name:'Rhyme Time',desc:'Find the word that rhymes!',color:'#7B2FBE',stars:3},
+  {id:'animalsounds',icon:'🐾',name:'Animal Sounds',desc:'What sound does each animal make?',color:'#2DC653',stars:3},
+  {id:'patterns',icon:'🔮',name:'Pattern Play',desc:'Complete the pattern!',color:'#E91E8C',stars:3},
+  {id:'wordbuilder',icon:'🔡',name:'Word Builder',desc:'Fill in the missing letter!',color:'#00B4D8',stars:3},
+  {id:'memory',icon:'🧠',name:'Memory Match',desc:'Flip cards and find the pairs!',color:'#FF6B35',stars:3},
+  {id:'compare',icon:'📏',name:'Bigger or Smaller',desc:'Which number is bigger?',color:'#FFD60A',stars:3},
+];
+
+const BADGES = [
+  {id:'first_star',emoji:'⭐',name:'First Star!',desc:'Earn your first star',req:1,unit:'stars'},
+  {id:'star5',emoji:'🌟',name:'Star Collector',desc:'Earn 5 stars',req:5,unit:'stars'},
+  {id:'star20',emoji:'💫',name:'Superstar!',desc:'Earn 20 stars',req:20,unit:'stars'},
+  {id:'activities5',emoji:'🎨',name:'Activity Champ',desc:'Complete 5 activities',req:5,unit:'activities'},
+  {id:'games3',emoji:'🎮',name:'Game Player',desc:'Play 3 different games',req:3,unit:'games'},
+  {id:'allgames',emoji:'🏆',name:'Game Master!',desc:'Complete all 12 games',req:12,unit:'games'},
+  {id:'literacy',emoji:'📚',name:'Reading Star',desc:'Complete all literacy activities',req:8,unit:'literacy'},
+  {id:'daily',emoji:'📅',name:'Daily Learner',desc:'Complete a full day schedule',req:1,unit:'daily'},
+];
+
+// ===================================================
+// STATE
+// ===================================================
+let state = {
+  stars: 0,
+  completedActivities: [],
+  gamesCompleted: [],
+  prepChecked: [],
+  pinEntered: '',
+  parentUnlocked: false,
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('westons_hub_v1');
+    if (saved) Object.assign(state, JSON.parse(saved));
+  } catch(e) {}
+}
+function saveState() {
+  try { localStorage.setItem('westons_hub_v1', JSON.stringify(state)); } catch(e) {}
+}
+
+// ===================================================
+// NAVIGATION
+// ===================================================
+let currentScreen = 'schedule';
+function navigate(screen) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+  document.getElementById('nav-'+screen).classList.add('active');
+  currentScreen = screen;
+  document.getElementById('app-main').scrollTop = 0;
+  if(screen==='schedule') loadScheduleScreen();
+  if(screen==='activities') loadActivitiesScreen('all');
+  if(screen==='progress') loadProgressScreen();
+  if(screen==='parent') loadParentScreen();
+  if(screen==='games') loadGamesScreen();
+}
+
+// ===================================================
+// HEADER
+// ===================================================
+function updateHeader() {
+  const h = new Date().getHours();
+  let greeting = h<12 ? 'Good morning! ☀️' : h<17 ? 'Good afternoon! 🌤️' : 'Good evening! 🌙';
+  document.getElementById('header-greeting').textContent = greeting;
+  document.getElementById('star-count').textContent = state.stars;
+}
+
+// ===================================================
+// SCHEDULE SCREEN
+// ===================================================
+function loadScheduleScreen() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun,1=Mon,...6=Sat
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dateStr = `${days[day]}, ${months[now.getMonth()]} ${now.getDate()}`;
+
+  let schedule, dayType, bannerColor, bannerEmoji;
+  if(day===0||day===6){
+    schedule=SCHEDULE_WEEKEND; dayType='Weekend! 🎉'; bannerColor='linear-gradient(135deg,#2DC653,#00B4D8)'; bannerEmoji='🏖️';
+  } else if(day===2||day===4){
+    schedule=SCHEDULE_TUTH; dayType='School & Daycare Day'; bannerColor='linear-gradient(135deg,#7B2FBE,#00B4D8)'; bannerEmoji='🏫';
+  } else {
+    schedule=SCHEDULE_MWF; dayType='At-Home Learning Day!'; bannerColor='linear-gradient(135deg,#FF6B35,#FF8E53)'; bannerEmoji='🏠';
+  }
+
+  const currentMins = now.getHours()*60 + now.getMinutes();
+  function parseTime(t) {
+    if(!t) return -1;
+    const parts = t.split(':');
+    return parseInt(parts[0])*60+parseInt(parts[1]||0);
+  }
+
+  let html = `
+    <div class="day-banner" style="background:${bannerColor}">
+      <div class="day-info">
+        <h2>${dateStr}</h2>
+        <p>${dayType}</p>
+      </div>
+      <div class="day-emoji">${bannerEmoji}</div>
+    </div>
+    <div class="section-title">📅 Today's Schedule</div>
+  `;
+
+  schedule.forEach((block,i) => {
+    const endMins = parseTime(block.end);
+    const done = endMins>0 && currentMins > endMins;
+    const isCurrent = block.end && currentMins >= parseTime(block.end)-block.mins && currentMins < endMins;
+
+    let gameBtn = '';
+    if(block.game && (isCurrent || !done)) {
+      gameBtn = `<button class="game-link-btn" onclick="startGameById('${block.game}')">Play Game!</button>`;
+    }
+
+    html += `
+      <div class="schedule-block ${isCurrent?'current':''} ${done?'done':''}" style="${isCurrent?`border-left:4px solid ${block.color};`:''}">
+        <div class="block-icon" style="background:${block.color}22;">${block.icon}</div>
+        <div class="block-info">
+          <div class="block-time">${block.time}${block.end?(' – '+formatTime(block.end)):''}</div>
+          <div class="block-label">${block.label}</div>
+          <div class="block-desc">${block.desc}</div>
+        </div>
+        ${isCurrent ? '<div class="now-pill">NOW!</div>' : ''}
+        ${gameBtn}
+      </div>
+    `;
+  });
+
+  // Quick links
+  html += `
+    <div class="card mt-8">
+      <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🚀 Quick Start</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button onclick="navigate('games')" style="background:linear-gradient(135deg,#00B4D8,#7B2FBE);color:#fff;border:none;border-radius:14px;padding:14px 8px;font-size:14px;font-weight:700;cursor:pointer;">🎮 Play a Game</button>
+        <button onclick="navigate('activities')" style="background:linear-gradient(135deg,#E91E8C,#FF6B35);color:#fff;border:none;border-radius:14px;padding:14px 8px;font-size:14px;font-weight:700;cursor:pointer;">🎨 Do Activity</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('schedule-content').innerHTML = html;
+}
+
+function formatTime(t) {
+  if(!t) return '';
+  const h = parseInt(t.split(':')[0]);
+  const m = t.split(':')[1]||'00';
+  const ampm = h>=12?'PM':'AM';
+  const h12 = h>12?h-12:h===0?12:h;
+  return `${h12}:${m} ${ampm}`;
+}
+
+// ===================================================
+// GAMES SCREEN
+// ===================================================
+function loadGamesScreen() {
+  let html = '';
+  GAMES_LIST.forEach(g => {
+    const done = state.gamesCompleted.includes(g.id);
+    html += `
+      <div class="game-card" onclick="startGameById('${g.id}')" style="border-color:${done?g.color:'transparent'}">
+        <span class="game-emoji">${g.icon}</span>
+        <div class="game-name">${g.name}</div>
+        <div class="game-desc">${g.desc}</div>
+        <div class="game-stars-display" style="color:${done?'#2DC653':'#aaa'}">${done?'✅ Completed!':'⭐ Earn '+g.stars+' stars'}</div>
+      </div>
+    `;
+  });
+  document.getElementById('games-grid').innerHTML = html;
+}
+
+// ===================================================
+// GAME ENGINE
+// ===================================================
+let currentGame = null;
+let gameRound = 0;
+let gameScore = 0;
+const ROUNDS_PER_GAME = 10;
+
+function startGameById(gameId) {
+  currentGame = gameId;
+  gameRound = 0;
+  gameScore = 0;
+  const g = GAMES_LIST.find(x=>x.id===gameId);
+  document.getElementById('game-title').textContent = g.icon + ' ' + g.name;
+  document.getElementById('game-live-score').textContent = '⭐ 0';
+  document.getElementById('game-overlay').classList.add('active');
+  updateGameProgress();
+  renderGame();
+}
+
+function exitGame() {
+  document.getElementById('game-overlay').classList.remove('active');
+  currentGame = null;
+}
+
+function updateGameProgress() {
+  const pct = (gameRound/ROUNDS_PER_GAME)*100;
+  document.getElementById('game-progress-fill').style.width = pct+'%';
+  document.getElementById('game-subtitle').textContent = `Round ${Math.min(gameRound+1,ROUNDS_PER_GAME)} of ${ROUNDS_PER_GAME}`;
+  document.getElementById('game-live-score').textContent = '⭐ ' + gameScore;
+}
+
+function renderGame() {
+  if(currentGame==='memory') { renderMemoryGame(); return; }
+  if(gameRound >= ROUNDS_PER_GAME) { showGameWin(); return; }
+  if(currentGame==='abc') renderAbcGame();
+  else if(currentGame==='numbers') renderNumberGame();
+  else if(currentGame==='sightwords') renderSightWordGame();
+  else if(currentGame==='shapes') renderShapeGame();
+  else if(currentGame==='colors') renderColorGame();
+  else if(currentGame==='counting') renderCountingGame();
+  else if(currentGame==='rhyme') renderRhymeGame();
+  else if(currentGame==='animalsounds') renderAnimalSoundsGame();
+  else if(currentGame==='patterns') renderPatternGame();
+  else if(currentGame==='wordbuilder') renderWordBuilderGame();
+  else if(currentGame==='compare') renderCompareGame();
+}
+
+// --- ABC GAME ---
+let abcQuestions = [];
+function renderAbcGame() {
+  if(gameRound===0) {
+    abcQuestions = shuffle([...LETTER_DATA]).slice(0,ROUNDS_PER_GAME);
+  }
+  const q = abcQuestions[gameRound];
+  const allOptions = [q.emoji, ...q.distractors];
+  const opts = shuffle(allOptions);
+  const colors = ['#FF6B35','#00B4D8','#2DC653','#7B2FBE'];
+
+  let html = `
+    <div class="score-display">Find the letter sound!</div>
+    <div class="game-letter-display" style="background:${colors[gameRound%4]}">
+      ${q.letter}
+      <span class="letter-sub">${q.letter.toLowerCase()}</span>
+    </div>
+    <div class="game-question">Tap the one that starts with <strong>${q.letter}</strong>!</div>
+    <div class="options-grid">
+  `;
+  opts.forEach(emoji => {
+    html += `<button class="option-btn" onclick="checkAbcAnswer(this,'${emoji}','${q.emoji}')">
+      ${emoji}<span class="option-label">${emoji===q.emoji?q.name:''}</span>
+    </button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+
+function checkAbcAnswer(btn, chosen, correct) {
+  const allBtns = btn.parentElement.querySelectorAll('.option-btn');
+  allBtns.forEach(b=>b.onclick=null);
+  if(chosen===correct) {
+    btn.classList.add('correct');
+    gameScore++;
+    document.getElementById('game-live-score').textContent = '⭐ '+gameScore;
+    spawnConfettiAt();
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b=>{if(b.textContent.trim().startsWith(correct))b.classList.add('correct');});
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},1200);
+  }
+}
+
+// --- NUMBER COUNTING GAME ---
+const NUMBER_EMOJIS = ['🍎','🐝','⭐','🎈','🌸','🦋','🍭','🎸','🐸','🌻'];
+function renderNumberGame() {
+  const count = Math.floor(Math.random()*9)+1;
+  const emoji = NUMBER_EMOJIS[gameRound%NUMBER_EMOJIS.length];
+  const wrong = new Set([count]);
+  while(wrong.size<4){wrong.add(Math.max(1,count+(Math.floor(Math.random()*5)-2)))}
+  const opts = shuffle([...wrong]);
+  let emojiHtml = '';
+  for(let i=0;i<count;i++) emojiHtml+=`<span class="count-emoji">${emoji}</span>`;
+  let html = `
+    <div class="game-question">How many ${emoji} do you see?</div>
+    <div class="emoji-count-area">${emojiHtml}</div>
+    <div class="number-options">
+  `;
+  opts.forEach(n=>{
+    html+=`<button class="number-btn" onclick="checkNumberAnswer(this,${n},${count})">${n}</button>`;
+  });
+  html+='</div>';
+  document.getElementById('game-body').innerHTML=html;
+}
+function checkNumberAnswer(btn,chosen,correct){
+  const allBtns=btn.parentElement.querySelectorAll('.number-btn');
+  allBtns.forEach(b=>b.onclick=null);
+  if(chosen===correct){
+    btn.classList.add('correct');
+    gameScore++;
+    document.getElementById('game-live-score').textContent='⭐ '+gameScore;
+    spawnConfettiAt();
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b=>{if(parseInt(b.textContent)===correct)b.classList.add('correct');});
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},1200);
+  }
+}
+
+// --- SIGHT WORDS GAME ---
+let swPool=[];
+function renderSightWordGame(){
+  if(gameRound===0) swPool=shuffle([...SIGHT_WORDS]);
+  const correct=swPool[gameRound%swPool.length];
+  const pool=SIGHT_WORDS.filter(w=>w!==correct);
+  const distractors=shuffle(pool).slice(0,3);
+  const opts=shuffle([correct,...distractors]);
+  let html=`
+    <div class="game-question">Find this word!</div>
+    <div class="sight-word-display">${correct}</div>
+    <div class="word-options">
+  `;
+  opts.forEach(w=>{
+    html+=`<button class="word-btn" onclick="checkWordAnswer(this,'${w}','${correct}')">${w}</button>`;
+  });
+  html+='</div>';
+  document.getElementById('game-body').innerHTML=html;
+}
+function checkWordAnswer(btn,chosen,correct){
+  const allBtns=btn.parentElement.querySelectorAll('.word-btn');
+  allBtns.forEach(b=>b.onclick=null);
+  if(chosen===correct){
+    btn.classList.add('correct');
+    gameScore++;
+    document.getElementById('game-live-score').textContent='⭐ '+gameScore;
+    spawnConfettiAt();
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b=>{if(b.textContent===correct)b.classList.add('correct');});
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},1200);
+  }
+}
+
+// --- SHAPE GAME ---
+let shapeQuestions=[];
+function renderShapeGame(){
+  if(gameRound===0) shapeQuestions=[];
+  const correct=SHAPES[gameRound%SHAPES.length];
+  const others=SHAPES.filter(s=>s.name!==correct.name);
+  const distractors=shuffle(others).slice(0,3);
+  const opts=shuffle([correct,...distractors]);
+  let html=`
+    <div class="game-question">Tap the <strong>${correct.name}</strong>!</div>
+    <div class="shape-options">
+  `;
+  opts.forEach(s=>{
+    const svg=s.svg.replace(/FILL/g,s.color);
+    html+=`<button class="shape-btn" onclick="checkShapeAnswer(this,'${s.name}','${correct.name}')">
+      <svg viewBox="0 0 120 120">${svg}</svg>
+      <span class="shape-name">${s.name}</span>
+    </button>`;
+  });
+  html+='</div>';
+  document.getElementById('game-body').innerHTML=html;
+}
+function checkShapeAnswer(btn,chosen,correct){
+  const allBtns=btn.parentElement.querySelectorAll('.shape-btn');
+  allBtns.forEach(b=>b.onclick=null);
+  if(chosen===correct){
+    btn.classList.add('correct');
+    gameScore++;
+    document.getElementById('game-live-score').textContent='⭐ '+gameScore;
+    spawnConfettiAt();
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b=>{if(b.querySelector('.shape-name').textContent===correct)b.classList.add('correct');});
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},1200);
+  }
+}
+
+// --- COLOR LAB GAME ---
+let colorSel=[];
+let colorMixesDone=0;
+function renderColorGame(){
+  colorSel=[];
+  colorMixesDone=colorMixesDone||0;
+  let html=`
+    <div class="color-mixer">
+      <div class="game-question">Pick 2 colors and MIX them!</div>
+      <div class="mixer-palette">
+  `;
+  COLORS_DATA.forEach(c=>{
+    html+=`<div class="color-swatch" id="swatch-${c.name}" style="background:${c.hex}" onclick="selectColor('${c.name}','${c.hex}')"></div>`;
+  });
+  html+=`
+      </div>
+      <div class="mixer-equation">
+        <div class="mixer-circle" id="mix-c1" style="background:#eee"></div>
+        <span style="font-size:28px">+</span>
+        <div class="mixer-circle" id="mix-c2" style="background:#eee"></div>
+        <span style="font-size:28px">=</span>
+        <div class="mixer-circle" id="mix-result" style="background:#eee"></div>
+      </div>
+      <button class="mix-btn" onclick="doMix()">🧪 MIX!</button>
+      <div class="mix-result" id="mix-result-text"></div>
+      <div style="font-size:13px;color:#aaa;margin-top:8px;">Round ${gameRound+1} of ${ROUNDS_PER_GAME}</div>
+    </div>
+  `;
+  document.getElementById('game-body').innerHTML=html;
+}
+function selectColor(name,hex){
+  if(colorSel.length>=2) { colorSel=[]; document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected')); }
+  colorSel.push({name,hex});
+  document.getElementById('swatch-'+name).classList.add('selected');
+  if(colorSel.length>=1) document.getElementById('mix-c1').style.background=colorSel[0]?colorSel[0].hex:'#eee';
+  if(colorSel.length>=2) document.getElementById('mix-c2').style.background=colorSel[1].hex;
+}
+function doMix(){
+  if(colorSel.length<2){document.getElementById('mix-result-text').textContent='Pick 2 colors first!';return;}
+  const key=colorSel[0].name+'+'+colorSel[1].name;
+  const result=COLOR_MIXES[key];
+  if(result){
+    const hex=COLOR_MIX_RESULTS[result]||'#888';
+    document.getElementById('mix-result').style.background=hex;
+    document.getElementById('mix-result-text').innerHTML=`🎉 <strong>${colorSel[0].name} + ${colorSel[1].name} = ${result}!</strong>`;
+    gameScore++;
+    document.getElementById('game-live-score').textContent='⭐ '+gameScore;
+    spawnConfettiAt();
+    setTimeout(()=>{gameRound++;updateGameProgress();colorSel=[];renderGame();},1800);
+  } else {
+    document.getElementById('mix-result').style.background='#888';
+    document.getElementById('mix-result-text').textContent='Hmm, try different colors!';
+    setTimeout(()=>{gameRound++;updateGameProgress();colorSel=[];renderGame();},1400);
+  }
+}
+
+// --- COUNTING / ADDITION GAME ---
+const ADD_EMOJIS=['🍎','🍭','⭐','🐝','🎈'];
+function renderCountingGame(){
+  const a=Math.floor(Math.random()*4)+1;
+  const b=Math.floor(Math.random()*4)+1;
+  const correct=a+b;
+  const emoji=ADD_EMOJIS[gameRound%ADD_EMOJIS.length];
+  const wrong=new Set([correct]);
+  while(wrong.size<4){wrong.add(Math.max(1,correct+(Math.floor(Math.random()*5)-2)))}
+  const opts=shuffle([...wrong]);
+  let row1='',row2='';
+  for(let i=0;i<a;i++)row1+=`<span style="font-size:38px">${emoji}</span>`;
+  for(let i=0;i<b;i++)row2+=`<span style="font-size:38px">${emoji}</span>`;
+  let html=`
+    <div class="game-question">How many ${emoji} in all?</div>
+    <div style="text-align:center;margin:8px 0">
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-bottom:6px">${row1}</div>
+      <div style="font-size:24px;font-weight:700;color:#aaa">and</div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-top:6px">${row2}</div>
+    </div>
+    <div class="number-options" style="margin-top:16px">
+  `;
+  opts.forEach(n=>{
+    html+=`<button class="number-btn" onclick="checkNumberAnswer(this,${n},${correct})">${n}</button>`;
+  });
+  html+='</div>';
+  document.getElementById('game-body').innerHTML=html;
+}
+
+// ─── RHYME TIME ───────────────────────────────────────
+let rhymeQuestions = [];
+function renderRhymeGame() {
+  if(gameRound===0) rhymeQuestions = shuffle([...RHYME_DATA]).slice(0, ROUNDS_PER_GAME);
+  const q = rhymeQuestions[gameRound];
+  const opts = shuffle([q.rhyme, ...q.distractors]);
+  let html = `
+    <div class="game-question">Which one rhymes with <strong>${q.word}</strong>?</div>
+    <div class="rhyme-word-box">
+      <span class="rhyme-emoji">${q.emoji}</span>
+      <div class="rhyme-word">${q.word}</div>
+    </div>
+    <div class="options-grid">
+  `;
+  opts.forEach(e => {
+    const name = e===q.rhyme ? q.rhymeName : '';
+    html += `<button class="option-btn" onclick="checkRhymeAnswer(this,'${e}','${q.rhyme}')">
+      ${e}<span class="option-label">${name}</span>
+    </button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+function checkRhymeAnswer(btn, chosen, correct) {
+  const allBtns = btn.parentElement.querySelectorAll('.option-btn');
+  allBtns.forEach(b=>b.onclick=null);
+  if(chosen===correct) {
+    btn.classList.add('correct'); gameScore++;
+    document.getElementById('game-live-score').textContent='⭐ '+gameScore;
+    spawnConfettiAt();
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b=>{if(b.textContent.trim().startsWith(correct))b.classList.add('correct');});
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},1200);
+  }
+}
+
+// ─── ANIMAL SOUNDS ────────────────────────────────────
+let animalQuestions = [];
+function renderAnimalSoundsGame() {
+  if(gameRound===0) animalQuestions = shuffle([...ANIMAL_SOUNDS]).slice(0, ROUNDS_PER_GAME);
+  const q = animalQuestions[gameRound];
+  const opts = shuffle([q.sound, ...q.distractors]);
+  let html = `
+    <div class="game-question">What sound does the <strong>${q.name}</strong> make?</div>
+    <div class="animal-display-box">${q.animal}</div>
+    <div class="animal-name-label">${q.name}</div>
+    <div class="sound-options">
+  `;
+  opts.forEach(s => {
+    html += `<button class="option-btn sound-btn" onclick="checkSoundAnswer(this,'${s}','${q.sound}')">
+      <span style="font-size:18px;font-weight:800">${s}</span>
+    </button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+function checkSoundAnswer(btn, chosen, correct) {
+  const allBtns = btn.parentElement.querySelectorAll('.option-btn');
+  allBtns.forEach(b=>b.onclick=null);
+  if(chosen===correct) {
+    btn.classList.add('correct'); gameScore++;
+    document.getElementById('game-live-score').textContent='⭐ '+gameScore;
+    spawnConfettiAt();
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b=>{if(b.querySelector('span')&&b.querySelector('span').textContent===correct)b.classList.add('correct');});
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},1200);
+  }
+}
+
+// ─── PATTERN PLAY ─────────────────────────────────────
+let patternQuestions = [];
+function renderPatternGame() {
+  if(gameRound===0) patternQuestions = shuffle([...PATTERNS]).slice(0, ROUNDS_PER_GAME);
+  const q = patternQuestions[gameRound];
+  const seq = [...q.seq, '?'];
+  const allEmojis = [...new Set(q.seq)];
+  while(allEmojis.length < 4) { const extras=['🔶','🟣','🟤','⬛']; allEmojis.push(extras[allEmojis.length-2]||'🔶'); }
+  const opts = shuffle(allEmojis.slice(0,4));
+  let seqHtml = seq.map(e => e==='?' ?
+    `<div class="pattern-blank">?</div>` :
+    `<div class="pattern-dot">${e}</div>`
+  ).join('');
+  let html = `
+    <div class="game-question">What comes next?</div>
+    <div class="pattern-row">${seqHtml}</div>
+    <div class="pattern-options">
+  `;
+  opts.forEach(e => {
+    html += `<button class="pattern-opt-btn" onclick="checkPatternAnswer(this,'${e}','${q.answer}')">${e}</button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+function checkPatternAnswer(btn, chosen, correct) {
+  const allBtns = btn.parentElement.querySelectorAll('.pattern-opt-btn');
+  allBtns.forEach(b=>b.onclick=null);
+  if(chosen===correct) {
+    btn.classList.add('correct'); gameScore++;
+    document.getElementById('game-live-score').textContent='⭐ '+gameScore;
+    spawnConfettiAt();
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b=>{if(b.textContent.trim()===correct)b.classList.add('correct');});
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},1200);
+  }
+}
+
+// ─── WORD BUILDER ─────────────────────────────────────
+let cvcQuestions = [];
+function renderWordBuilderGame() {
+  if(gameRound===0) cvcQuestions = shuffle([...CVC_WORDS]).slice(0, ROUNDS_PER_GAME);
+  const q = cvcQuestions[gameRound];
+  const letters = q.word.split('');
+  const opts = shuffle([...q.letters]);
+  let tilesHtml = letters.map((l,i) => i===q.blank ?
+    `<div class="word-blank-tile" id="blank-tile">_</div>` :
+    `<div class="word-tile">${l}</div>`
+  ).join('');
+  let html = `
+    <div class="game-question">What letter is missing?</div>
+    <div class="word-display">${tilesHtml}</div>
+    <div class="letter-choice-grid">
+  `;
+  opts.forEach(l => {
+    html += `<button class="letter-choice-btn" onclick="checkCvcAnswer(this,'${l}','${q.answer}','${q.word}')">${l}</button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+function checkCvcAnswer(btn, chosen, correct, word) {
+  const allBtns = btn.parentElement.querySelectorAll('.letter-choice-btn');
+  allBtns.forEach(b=>b.onclick=null);
+  const tile = document.getElementById('blank-tile');
+  if(tile) tile.textContent = chosen;
+  if(chosen===correct) {
+    btn.classList.add('correct'); if(tile){tile.style.background='#2DC653';tile.style.color='#fff';}
+    gameScore++;
+    document.getElementById('game-live-score').textContent='⭐ '+gameScore;
+    spawnConfettiAt();
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},1000);
+  } else {
+    btn.classList.add('wrong'); if(tile){tile.style.background='#E53935';tile.style.color='#fff';}
+    allBtns.forEach(b=>{if(b.textContent.trim()===correct)b.classList.add('correct');});
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},1300);
+  }
+}
+
+// ─── MEMORY MATCH ─────────────────────────────────────
+let memCards = [], memFlipped = [], memMatched = 0, memLocked = false;
+function renderMemoryGame() {
+  if(gameRound === 0) {
+    memMatched = 0; memFlipped = []; memLocked = false;
+    const pairs = shuffle([...MEMORY_PAIRS, ...MEMORY_PAIRS]);
+    memCards = pairs.map((e,i)=>({id:i,emoji:e,flipped:false,matched:false}));
+    let html = '<div class="game-question">Find the matching pairs! 🧠</div><div class="memory-grid">';
+    const btnColors=['#FF6B35','#7B2FBE','#2DC653','#00B4D8','#E91E8C','#FFD60A','#FF6B35','#7B2FBE','#2DC653','#00B4D8','#E91E8C','#FFD60A','#FF6B35','#7B2FBE','#2DC653','#00B4D8'];
+    memCards.forEach((c,i) => {
+      html += `<div class="mem-card" id="mc-${i}" onclick="flipMemCard(${i})">
+        <div class="mem-card-inner">
+          <div class="mem-front" style="background:linear-gradient(135deg,${btnColors[i]},${btnColors[(i+4)%16]})">⭐</div>
+          <div class="mem-back">${c.emoji}</div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    document.getElementById('game-body').innerHTML = html;
+  }
+}
+function flipMemCard(idx) {
+  const c = memCards[idx];
+  if(memLocked || c.flipped || c.matched) return;
+  c.flipped = true;
+  const el = document.getElementById('mc-'+idx);
+  el.classList.add('flipped');
+  memFlipped.push(idx);
+  if(memFlipped.length === 2) {
+    memLocked = true;
+    const [a, b] = memFlipped;
+    if(memCards[a].emoji === memCards[b].emoji) {
+      memCards[a].matched = memCards[b].matched = true;
+      document.getElementById('mc-'+a).classList.add('matched');
+      document.getElementById('mc-'+b).classList.add('matched');
+      gameScore++; memMatched++;
+      document.getElementById('game-live-score').textContent='⭐ '+gameScore;
+      spawnConfettiAt();
+      memFlipped = []; memLocked = false;
+      if(memMatched === MEMORY_PAIRS.length) {
+        gameRound = ROUNDS_PER_GAME;
+        setTimeout(()=>showGameWin(), 800);
+      }
+    } else {
+      setTimeout(()=>{
+        memCards[a].flipped = memCards[b].flipped = false;
+        document.getElementById('mc-'+a).classList.remove('flipped');
+        document.getElementById('mc-'+b).classList.remove('flipped');
+        memFlipped = []; memLocked = false;
+      }, 1000);
+    }
+  }
+}
+
+// ─── BIGGER OR SMALLER ────────────────────────────────
+function renderCompareGame() {
+  const a = Math.floor(Math.random()*9)+1;
+  let b = a;
+  while(b===a) b = Math.floor(Math.random()*9)+1;
+  const askBigger = gameRound % 2 === 0;
+  const correct = askBigger ? Math.max(a,b) : Math.min(a,b);
+  const opts = shuffle([a,b]);
+  let html = `
+    <div class="game-question">${askBigger?'🔺 Tap the <strong>BIGGER</strong> number!':'🔻 Tap the <strong>SMALLER</strong> number!'}</div>
+    <div class="compare-wrap">
+  `;
+  const cColors=['#FF6B35','#7B2FBE'];
+  opts.forEach((n,i) => {
+    html += `<button class="compare-btn" style="background:${cColors[i]}" onclick="checkCompareAnswer(this,${n},${correct})">${n}</button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+function checkCompareAnswer(btn, chosen, correct) {
+  const allBtns = btn.parentElement.querySelectorAll('.compare-btn');
+  allBtns.forEach(b=>b.onclick=null);
+  if(chosen===correct) {
+    btn.classList.add('correct'); gameScore++;
+    document.getElementById('game-live-score').textContent='⭐ '+gameScore;
+    spawnConfettiAt();
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b=>{if(parseInt(b.textContent)===correct)b.classList.add('correct');});
+    setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},1200);
+  }
+}
+
+// --- WIN SCREEN ---
+function showGameWin(){
+  const starsEarned = Math.ceil((gameScore/ROUNDS_PER_GAME)*3);
+  const msgs = ['Amazing work!','You\'re so smart!','Incredible!','Superstar!'];
+  state.stars += starsEarned;
+  if(!state.gamesCompleted.includes(currentGame)) state.gamesCompleted.push(currentGame);
+  saveState();
+  updateHeader();
+  document.getElementById('game-body').innerHTML=`
+    <div class="win-screen">
+      <div class="win-emoji">🏆</div>
+      <div class="win-title">${msgs[Math.floor(Math.random()*msgs.length)]}</div>
+      <div class="win-stars">${'⭐'.repeat(starsEarned)}</div>
+      <div class="win-msg">You earned <strong>${starsEarned} stars!</strong><br>Score: ${gameScore}/${ROUNDS_PER_GAME} correct</div>
+      <button class="play-again-btn" onclick="startGameById('${currentGame}')">🔄 Play Again</button>
+      <button class="play-again-btn" onclick="exitGame();navigate('games');" style="background:#f0f0f0;color:#333;margin-top:10px;box-shadow:none;">🎮 All Games</button>
+    </div>
+  `;
+  spawnConfettiAt(true);
+}
+
+// ===================================================
+// ACTIVITIES SCREEN
+// ===================================================
+let currentFilter = 'all';
+function loadActivitiesScreen(filter){
+  currentFilter = filter||currentFilter;
+  filterActivities(currentFilter);
+}
+function filterActivities(cat){
+  currentFilter = cat;
+  document.querySelectorAll('.filter-tab').forEach(t=>{
+    t.classList.toggle('active', t.textContent.toLowerCase().includes(cat)||
+      (cat==='all'&&t.textContent.includes('All'))||
+      (cat==='literacy'&&t.textContent.includes('Literacy'))||
+      (cat==='math'&&t.textContent.includes('Math'))||
+      (cat==='arts'&&t.textContent.includes('Arts'))||
+      (cat==='physical'&&t.textContent.includes('Physical'))||
+      (cat==='sibling'&&t.textContent.includes('Sibling'))
+    );
+  });
+  const filtered = cat==='all' ? ACTIVITIES : ACTIVITIES.filter(a=>a.cat===cat);
+  const catColors = {literacy:'#00B4D8',math:'#7B2FBE',arts:'#E91E8C',physical:'#2DC653',sibling:'#FFC107'};
+  let html='';
+  if(filtered.length===0){
+    html='<div class="no-activities"><div class="no-emoji">🔍</div><p>No activities found!</p></div>';
+  } else {
+    filtered.forEach(a=>{
+      const done = state.completedActivities.includes(a.id);
+      const color = catColors[a.cat]||'#aaa';
+      html+=`
+        <div class="activity-card ${done?'completed':''}">
+          <div class="activity-icon" style="background:${color}22">${a.icon}</div>
+          <div class="activity-info">
+            <div class="activity-name">${a.name}</div>
+            <div class="activity-time">⏱️ ${a.time}</div>
+            <div class="activity-desc">${a.desc}</div>
+          </div>
+          <div class="activity-check ${done?'done':''}" onclick="toggleActivity('${a.id}',this)"></div>
+        </div>
+      `;
+    });
+  }
+  document.getElementById('activities-list').innerHTML=html;
+}
+
+function toggleActivity(id,btn){
+  if(state.completedActivities.includes(id)){
+    state.completedActivities=state.completedActivities.filter(x=>x!==id);
+    btn.classList.remove('done');
+    btn.parentElement.classList.remove('completed');
+  } else {
+    state.completedActivities.push(id);
+    btn.classList.add('done');
+    btn.parentElement.classList.add('completed');
+    state.stars += 1;
+    updateHeader();
+    spawnConfettiAt();
+    showCelebration('⭐','Activity Done!','You earned 1 star — great job!');
+  }
+  saveState();
+}
+
+// ===================================================
+// PROGRESS SCREEN
+// ===================================================
+function loadProgressScreen(){
+  document.getElementById('progress-star-total').textContent = state.stars;
+  const cats = ['literacy','math','arts','physical'];
+  cats.forEach(cat=>{
+    const total = ACTIVITIES.filter(a=>a.cat===cat).length;
+    const done = ACTIVITIES.filter(a=>a.cat===cat&&state.completedActivities.includes(a.id)).length;
+    const pct = total>0?(done/total*100):0;
+    document.getElementById('prog-'+cat).style.width=pct+'%';
+    document.getElementById('prog-'+cat+'-count').textContent=done+'/'+total;
+  });
+  const gamesDone = state.gamesCompleted.length;
+  document.getElementById('prog-games').style.width=(gamesDone/12*100)+'%';
+  document.getElementById('prog-games-count').textContent=gamesDone+'/12';
+  // Badges
+  let html='';
+  BADGES.forEach(b=>{
+    const earned = checkBadge(b);
+    html+=`<div class="badge-card ${earned?'earned':'locked'}">
+      <div class="badge-emoji">${b.emoji}</div>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${b.desc}</div>
+    </div>`;
+  });
+  document.getElementById('badges-grid').innerHTML=html;
+}
+function checkBadge(b){
+  if(b.unit==='stars') return state.stars>=b.req;
+  if(b.unit==='activities') return state.completedActivities.length>=b.req;
+  if(b.unit==='games') return state.gamesCompleted.length>=b.req;
+  if(b.unit==='literacy') return ACTIVITIES.filter(a=>a.cat==='literacy'&&state.completedActivities.includes(a.id)).length>=b.req;
+  if(b.unit==='daily') return state.completedActivities.length>=4;
+  return false;
+}
+
+// ===================================================
+// PARENT SCREEN
+// ===================================================
+let pinBuffer='';
+function loadParentScreen(){
+  if(state.parentUnlocked){
+    showParentDashboard();
+  } else {
+    document.getElementById('pin-entry').style.display='flex';
+    document.getElementById('parent-dashboard').classList.remove('visible');
+    pinBuffer='';
+    updatePinDots();
+  }
+}
+function pinPress(d){
+  if(pinBuffer.length>=4) return;
+  pinBuffer+=d;
+  updatePinDots();
+  if(pinBuffer.length===4){
+    if(pinBuffer==='1234'){
+      state.parentUnlocked=true;
+      document.getElementById('pin-entry').style.display='none';
+      showParentDashboard();
+    } else {
+      document.getElementById('pin-error').textContent='Wrong PIN. Try again! (Hint: 1234)';
+      setTimeout(()=>{pinBuffer='';updatePinDots();document.getElementById('pin-error').textContent='';},1200);
+    }
+  }
+}
+function pinBackspace(){pinBuffer=pinBuffer.slice(0,-1);updatePinDots();}
+function pinClear(){pinBuffer='';updatePinDots();}
+function updatePinDots(){
+  for(let i=0;i<4;i++){
+    document.getElementById('dot-'+i).classList.toggle('filled',i<pinBuffer.length);
+  }
+}
+function lockParent(){
+  state.parentUnlocked=false;
+  pinBuffer='';
+  loadParentScreen();
+}
+function showParentDashboard(){
+  document.getElementById('pin-entry').style.display='none';
+  document.getElementById('parent-dashboard').classList.add('visible');
+  // Stats
+  const totalDone = state.completedActivities.length;
+  const totalActivities = ACTIVITIES.length;
+  const gamesDone = state.gamesCompleted.length;
+  let statsHtml=`
+    <div class="stat-row"><span>Activities Completed</span><span class="stat-val">${totalDone} / ${totalActivities}</span></div>
+    <div class="stat-row"><span>Games Played</span><span class="stat-val">${gamesDone} / 12</span></div>
+    <div class="stat-row"><span>Total Stars Earned</span><span class="stat-val">${state.stars} ⭐</span></div>
+    <div class="stat-row"><span>Literacy Activities</span><span class="stat-val">${ACTIVITIES.filter(a=>a.cat==='literacy'&&state.completedActivities.includes(a.id)).length}/8</span></div>
+    <div class="stat-row"><span>Math Activities</span><span class="stat-val">${ACTIVITIES.filter(a=>a.cat==='math'&&state.completedActivities.includes(a.id)).length}/8</span></div>
+    <div class="stat-row"><span>Arts Activities</span><span class="stat-val">${ACTIVITIES.filter(a=>a.cat==='arts'&&state.completedActivities.includes(a.id)).length}/8</span></div>
+    <div class="stat-row"><span>Physical Activities</span><span class="stat-val">${ACTIVITIES.filter(a=>a.cat==='physical'&&state.completedActivities.includes(a.id)).length}/8</span></div>
+  `;
+  document.getElementById('parent-stats').innerHTML=statsHtml;
+  // Games
+  let gamesHtml='';
+  GAMES_LIST.forEach(g=>{
+    const done=state.gamesCompleted.includes(g.id);
+    gamesHtml+=`<div class="stat-row"><span>${g.icon} ${g.name}</span><span class="stat-val">${done?'✅ Done':'⏳ Not yet'}</span></div>`;
+  });
+  document.getElementById('parent-games').innerHTML=gamesHtml;
+  document.getElementById('parent-total-stars').textContent=state.stars;
+  // Prep
+  let prepHtml='';
+  PREP_ITEMS.forEach(p=>{
+    const done=state.prepChecked.includes(p.id);
+    prepHtml+=`<div class="prep-item">
+      <div class="prep-check ${done?'done':''}" onclick="togglePrep('${p.id}',this)">${done?'✓':''}</div>
+      <span style="font-size:13px">${p.text}</span>
+    </div>`;
+  });
+  document.getElementById('prep-list').innerHTML=prepHtml;
+}
+function togglePrep(id,btn){
+  if(state.prepChecked.includes(id)){
+    state.prepChecked=state.prepChecked.filter(x=>x!==id);
+    btn.classList.remove('done');btn.textContent='';
+  } else {
+    state.prepChecked.push(id);
+    btn.classList.add('done');btn.textContent='✓';
+  }
+  saveState();
+}
+function confirmReset(){
+  if(confirm('Reset all of Weston\'s progress, stars, and completed activities? This cannot be undone.')){
+    state.stars=0;state.completedActivities=[];state.gamesCompleted=[];state.prepChecked=[];
+    saveState();updateHeader();showParentDashboard();
+    alert('All progress has been reset.');
+  }
+}
+
+// ===================================================
+// CELEBRATION & CONFETTI
+// ===================================================
+function showCelebration(emoji,title,msg,btnText){
+  document.getElementById('cel-emoji').textContent=emoji;
+  document.getElementById('cel-title').textContent=title;
+  document.getElementById('cel-msg').textContent=msg;
+  document.getElementById('cel-btn').textContent=btnText||'Awesome! ⭐';
+  document.getElementById('celebration').classList.add('active');
+}
+function closeCelebration(){
+  document.getElementById('celebration').classList.remove('active');
+}
+
+function spawnConfettiAt(big){
+  const container=document.getElementById('confetti-container');
+  const colors=['#FF6B35','#FFD60A','#2DC653','#00B4D8','#7B2FBE','#E91E8C'];
+  const count=big?40:16;
+  for(let i=0;i<count;i++){
+    const piece=document.createElement('div');
+    piece.className='confetti-piece';
+    piece.style.left=Math.random()*100+'%';
+    piece.style.top='-20px';
+    piece.style.background=colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDuration=(0.8+Math.random()*0.8)+'s';
+    piece.style.animationDelay=(Math.random()*0.4)+'s';
+    piece.style.transform=`rotate(${Math.random()*360}deg)`;
+    piece.style.width=(6+Math.random()*8)+'px';
+    piece.style.height=(6+Math.random()*8)+'px';
+    container.appendChild(piece);
+    setTimeout(()=>piece.remove(),1600);
+  }
+}
+
+// ===================================================
+// UTILS
+// ===================================================
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+// ===================================================
+// INIT
+// ===================================================
+function init(){
+  loadState();
+  updateHeader();
+  loadScheduleScreen();
+  // Auto-refresh schedule every minute
+  setInterval(()=>{if(currentScreen==='schedule')loadScheduleScreen();updateHeader();},60000);
+}
+init();
+</script>
+</body>
+</html>
