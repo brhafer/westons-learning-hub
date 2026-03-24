@@ -291,6 +291,21 @@ body{font-family:-apple-system,'SF Pro Rounded','Helvetica Neue',Arial,sans-seri
 .lowercase-btn.correct{border-color:var(--green);background:#E8F5E9;}
 .lowercase-btn.wrong{border-color:var(--red);background:#FFEBEE;animation:shake 0.4s;}
 
+/* Size Order */
+.size-order-wrap{display:flex;justify-content:center;align-items:center;gap:20px;width:100%;max-width:340px;flex-wrap:wrap;margin-top:10px;}
+.size-order-btn{background:#fff;border:3px solid #f0f0f0;border-radius:20px;width:92px;height:92px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-sm);transition:all 0.15s;}
+.size-order-btn:active{transform:scale(0.94);}
+.size-order-btn.tapped{border-color:var(--green);background:#E8F5E9;}
+.size-order-btn.wrong{animation:shake 0.4s;border-color:var(--red);}
+
+/* Sort It */
+.sort-item-display{font-size:96px;text-align:center;margin:8px 0 20px;}
+.sort-btns{display:flex;gap:16px;width:100%;max-width:360px;}
+.sort-btn{flex:1;height:120px;border-radius:24px;font-size:48px;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:var(--shadow);transition:all 0.15s;color:#fff;font-weight:900;}
+.sort-btn:active{transform:scale(0.94);}
+.sort-btn.correct{animation:bounce 0.4s;}
+.sort-btn.wrong{animation:shake 0.4s;}
+
 /* Bigger or Smaller */
 .compare-question{font-size:20px;font-weight:800;text-align:center;margin:8px 0 20px;}
 .compare-wrap{display:flex;gap:16px;align-items:center;justify-content:center;width:100%;max-width:360px;}
@@ -713,6 +728,9 @@ const GAMES_LIST = [
   {id:'uppercase',icon:'🔠',name:'Big & Small Letters',desc:'Match the big letter to the small one!',color:'#E91E8C',stars:3},
   {id:'numorder',icon:'🔢',name:'Number Order',desc:'Tap the numbers in order 1, 2, 3...!',color:'#2DC653',stars:3},
   {id:'firstletter',icon:'🔤',name:'First Letter',desc:'What letter does the picture start with?',color:'#7B2FBE',stars:3},
+  {id:'sizeorder',icon:'📐',name:'Size Order',desc:'Tap smallest to biggest!',color:'#00B4D8',stars:3},
+  {id:'sortit',icon:'🗂️',name:'Sort It!',desc:'Is it an animal or food?',color:'#2DC653',stars:3},
+  {id:'oddoneout',icon:'🔍',name:'Odd One Out',desc:'Find the one that does not belong!',color:'#E91E8C',stars:3},
 ];
 
 const BADGES = [
@@ -721,7 +739,7 @@ const BADGES = [
   {id:'star20',emoji:'💫',name:'Superstar!',desc:'Earn 20 stars',req:20,unit:'stars'},
   {id:'activities5',emoji:'🎨',name:'Activity Champ',desc:'Complete 5 activities',req:5,unit:'activities'},
   {id:'games3',emoji:'🎮',name:'Game Player',desc:'Play 3 different games',req:3,unit:'games'},
-  {id:'allgames',emoji:'🏆',name:'Game Master!',desc:'Complete all 15 games',req:15,unit:'games'},
+  {id:'allgames',emoji:'🏆',name:'Game Master!',desc:'Complete all 18 games',req:18,unit:'games'},
   {id:'literacy',emoji:'📚',name:'Reading Star',desc:'Complete all literacy activities',req:8,unit:'literacy'},
   {id:'daily',emoji:'📅',name:'Daily Learner',desc:'Complete a full day schedule',req:1,unit:'daily'},
 ];
@@ -928,6 +946,9 @@ function renderGame() {
   else if(currentGame==='uppercase') renderUppercaseGame();
   else if(currentGame==='numorder') renderNumOrderGame();
   else if(currentGame==='firstletter') renderFirstLetterGame();
+  else if(currentGame==='sizeorder') renderSizeOrderGame();
+  else if(currentGame==='sortit') renderSortGame();
+  else if(currentGame==='oddoneout') renderOddOneOutGame();
 }
 
 // --- ABC GAME ---
@@ -1529,6 +1550,142 @@ function renderFirstLetterGame() {
   document.getElementById('game-body').innerHTML = html;
 }
 function checkFirstLetterAnswer(btn, chosen, correct) {
+  const allBtns = btn.parentElement.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.onclick = null);
+  if(chosen === correct) {
+    btn.classList.add('correct'); gameScore++;
+    document.getElementById('game-live-score').textContent = '⭐ ' + gameScore;
+    spawnConfettiAt();
+    setTimeout(() => { gameRound++; updateGameProgress(); renderGame(); }, 900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b => { if(b.textContent.trim() === correct) b.classList.add('correct'); });
+    setTimeout(() => { gameRound++; updateGameProgress(); renderGame(); }, 1200);
+  }
+}
+
+// ─── SIZE ORDER ───────────────────────────────────────
+let sizeOrderProgress = 0;
+const SIZE_ORDER_EMOJIS = ['🍎','🐝','⭐','🎈','🌸','🦋','🍭','🐸','🌻','🐱'];
+function renderSizeOrderGame() {
+  sizeOrderProgress = 1;
+  const emoji = SIZE_ORDER_EMOJIS[gameRound % SIZE_ORDER_EMOJIS.length];
+  const sizes = shuffle([
+    {fontSize:'26px', order:1},
+    {fontSize:'50px', order:2},
+    {fontSize:'76px', order:3},
+  ]);
+  // Visual hint at top: show the emoji going small → medium → large
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;">
+      <span style="font-size:22px;">${emoji}</span>
+      <span style="font-size:18px;color:#aaa;">→</span>
+      <span style="font-size:40px;">${emoji}</span>
+      <span style="font-size:18px;color:#aaa;">→</span>
+      <span style="font-size:60px;">${emoji}</span>
+    </div>
+    <div class="size-order-wrap">
+  `;
+  sizes.forEach(s => {
+    html += `<button class="size-order-btn" id="sob-${s.order}" onclick="tapSizeOrder(${s.order})">
+      <span style="font-size:${s.fontSize};">${emoji}</span>
+    </button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+function tapSizeOrder(order) {
+  if(order === sizeOrderProgress) {
+    const btn = document.getElementById('sob-' + order);
+    btn.classList.add('tapped');
+    btn.onclick = null;
+    sizeOrderProgress++;
+    if(sizeOrderProgress > 3) {
+      gameScore++;
+      document.getElementById('game-live-score').textContent = '⭐ ' + gameScore;
+      spawnConfettiAt();
+      setTimeout(() => { gameRound++; updateGameProgress(); renderGame(); }, 900);
+    }
+  } else {
+    const btn = document.getElementById('sob-' + order);
+    btn.classList.add('wrong');
+    setTimeout(() => btn.classList.remove('wrong'), 500);
+  }
+}
+
+// ─── SORT IT! ─────────────────────────────────────────
+const SORT_ITEMS = [
+  {emoji:'🐱',cat:0},{emoji:'🐶',cat:0},{emoji:'🦁',cat:0},
+  {emoji:'🐘',cat:0},{emoji:'🐸',cat:0},{emoji:'🐔',cat:0},
+  {emoji:'🍎',cat:1},{emoji:'🍕',cat:1},{emoji:'🍦',cat:1},
+  {emoji:'🍰',cat:1},{emoji:'🌽',cat:1},{emoji:'🍭',cat:1},
+];
+const SORT_CATS = [
+  {emoji:'🐾', bg:'#2DC653'},
+  {emoji:'🍽️', bg:'#FF6B35'},
+];
+let sortQuestions = [];
+function renderSortGame() {
+  if(gameRound===0) sortQuestions = shuffle([...SORT_ITEMS]).slice(0, ROUNDS_PER_GAME);
+  const q = sortQuestions[gameRound];
+  let html = `
+    <div class="sort-item-display">${q.emoji}</div>
+    <div class="sort-btns">
+  `;
+  // Always cat 0 on left, cat 1 on right — no shuffle needed, just 2 choices
+  SORT_CATS.forEach((cat, idx) => {
+    html += `<button class="sort-btn" style="background:${cat.bg};"
+      onclick="checkSortAnswer(this,${idx},${q.cat})">${cat.emoji}</button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+function checkSortAnswer(btn, chosen, correct) {
+  const allBtns = btn.parentElement.querySelectorAll('.sort-btn');
+  allBtns.forEach(b => b.onclick = null);
+  if(chosen === correct) {
+    btn.classList.add('correct'); gameScore++;
+    document.getElementById('game-live-score').textContent = '⭐ ' + gameScore;
+    spawnConfettiAt();
+    setTimeout(() => { gameRound++; updateGameProgress(); renderGame(); }, 900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b => { if(b !== btn) b.classList.add('correct'); });
+    setTimeout(() => { gameRound++; updateGameProgress(); renderGame(); }, 1200);
+  }
+}
+
+// ─── ODD ONE OUT ──────────────────────────────────────
+const ODD_OUT_DATA = [
+  {items:['🐱','🐶','🦁','🍎'], odd:'🍎'},
+  {items:['🍕','🍦','🍰','🚗'], odd:'🚗'},
+  {items:['🚗','🚌','✈️','🐸'], odd:'🐸'},
+  {items:['🌹','🌷','🌻','🚗'], odd:'🚗'},
+  {items:['⚽','🏀','🎾','🍕'], odd:'🍕'},
+  {items:['🎸','🎹','🎺','🍎'], odd:'🍎'},
+  {items:['👕','👗','🧢','🚂'], odd:'🚂'},
+  {items:['🍎','🍊','🍋','🐶'], odd:'🐶'},
+  {items:['🐟','🐬','🦈','🚗'], odd:'🚗'},
+  {items:['⭐','🌙','☀️','🍕'], odd:'🍕'},
+];
+let oddOutQuestions = [];
+function renderOddOneOutGame() {
+  if(gameRound===0) oddOutQuestions = shuffle([...ODD_OUT_DATA]).slice(0, ROUNDS_PER_GAME);
+  const q = oddOutQuestions[gameRound];
+  const opts = shuffle([...q.items]);
+  // Show a visual hint: magnifying glass — no words needed
+  let html = `
+    <div style="font-size:48px;text-align:center;margin-bottom:14px;">🔍</div>
+    <div class="options-grid">
+  `;
+  opts.forEach(e => {
+    html += `<button class="option-btn" onclick="checkOddAnswer(this,'${e}','${q.odd}')"
+      style="font-size:56px;">${e}</button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+function checkOddAnswer(btn, chosen, correct) {
   const allBtns = btn.parentElement.querySelectorAll('.option-btn');
   allBtns.forEach(b => b.onclick = null);
   if(chosen === correct) {
