@@ -276,6 +276,21 @@ body{font-family:-apple-system,'SF Pro Rounded','Helvetica Neue',Arial,sans-seri
 .mem-back{background:#fff;border:3px solid #f0f0f0;font-size:30px;transform:rotateY(180deg);box-shadow:var(--shadow-sm);}
 .mem-card.matched .mem-back{border-color:var(--green);background:#E8F5E9;}
 
+/* Number Order game */
+.num-order-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:340px;margin-top:10px;}
+.num-order-btn{height:90px;border-radius:20px;font-size:52px;font-weight:900;color:#fff;border:none;cursor:pointer;box-shadow:var(--shadow);transition:all 0.15s;background:linear-gradient(135deg,var(--blue),var(--purple));}
+.num-order-btn:active{transform:scale(0.94);}
+.num-order-btn.tapped{background:linear-gradient(135deg,var(--green),#1a9e4a);transform:scale(0.96);}
+.num-order-btn.wrong{animation:shake 0.4s;}
+.num-order-hint{font-size:28px;font-weight:900;text-align:center;margin-bottom:8px;color:var(--orange);}
+
+/* Big & Small Letters */
+.lowercase-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:340px;}
+.lowercase-btn{height:110px;border-radius:20px;font-size:64px;font-weight:900;background:#fff;border:3px solid #f0f0f0;cursor:pointer;box-shadow:var(--shadow-sm);transition:all 0.15s;}
+.lowercase-btn:active{transform:scale(0.94);}
+.lowercase-btn.correct{border-color:var(--green);background:#E8F5E9;}
+.lowercase-btn.wrong{border-color:var(--red);background:#FFEBEE;animation:shake 0.4s;}
+
 /* Bigger or Smaller */
 .compare-question{font-size:20px;font-weight:800;text-align:center;margin:8px 0 20px;}
 .compare-wrap{display:flex;gap:16px;align-items:center;justify-content:center;width:100%;max-width:360px;}
@@ -633,14 +648,16 @@ const COLOR_MIX_RESULTS = {
 
 // ── NEW GAME DATA ──────────────────────────────────────
 const RHYME_DATA = [
-  {word:'CAT',emoji:'🐱',rhyme:'🎩',rhymeName:'Hat',distractors:['🍎','🌙','🚀']},
-  {word:'BEE',emoji:'🐝',rhyme:'🌳',rhymeName:'Tree',distractors:['🎈','⭐','🍕']},
-  {word:'FROG',emoji:'🐸',rhyme:'🐕',rhymeName:'Dog',distractors:['🌸','✏️','🎸']},
-  {word:'CAKE',emoji:'🎂',rhyme:'🐍',rhymeName:'Snake',distractors:['🌙','🎵','🦁']},
-  {word:'STAR',emoji:'⭐',rhyme:'🚗',rhymeName:'Car',distractors:['🎩','🍦','🐧']},
-  {word:'BALL',emoji:'⚽',rhyme:'🌅',rhymeName:'Wall',distractors:['🐝','🦊','🎪']},
-  {word:'FISH',emoji:'🐟',rhyme:'🍽️',rhymeName:'Dish',distractors:['🌻','🐘','🎯']},
-  {word:'RAIN',emoji:'🌧️',rhyme:'🚂',rhymeName:'Train',distractors:['🎂','🐸','🏠']},
+  {word:'CAT',emoji:'🐱',rhyme:'🎩',rhymeName:'Hat',distractors:['🍎','🌙','🚀'],distractorNames:['Apple','Moon','Rocket']},
+  {word:'BEE',emoji:'🐝',rhyme:'🌳',rhymeName:'Tree',distractors:['🎈','⭐','🍕'],distractorNames:['Balloon','Star','Pizza']},
+  {word:'FROG',emoji:'🐸',rhyme:'🐕',rhymeName:'Dog',distractors:['🌸','✏️','🎸'],distractorNames:['Flower','Pencil','Guitar']},
+  {word:'CAKE',emoji:'🎂',rhyme:'🐍',rhymeName:'Snake',distractors:['🌙','🎵','🦁'],distractorNames:['Moon','Music','Lion']},
+  {word:'STAR',emoji:'⭐',rhyme:'🚗',rhymeName:'Car',distractors:['🎩','🍦','🐧'],distractorNames:['Hat','Ice Cream','Penguin']},
+  {word:'BALL',emoji:'⚽',rhyme:'🌅',rhymeName:'Wall',distractors:['🐝','🦊','🎪'],distractorNames:['Bee','Fox','Circus']},
+  {word:'FISH',emoji:'🐟',rhyme:'🍽️',rhymeName:'Dish',distractors:['🌻','🐘','🎯'],distractorNames:['Sunflower','Elephant','Target']},
+  {word:'RAIN',emoji:'🌧️',rhyme:'🚂',rhymeName:'Train',distractors:['🎂','🐸','🏠'],distractorNames:['Cake','Frog','House']},
+  {word:'MOON',emoji:'🌙',rhyme:'🥄',rhymeName:'Spoon',distractors:['🍎','🐱','🎈'],distractorNames:['Apple','Cat','Balloon']},
+  {word:'BEAR',emoji:'🐻',rhyme:'🪑',rhymeName:'Chair',distractors:['🌙','⭐','🚗'],distractorNames:['Moon','Star','Car']},
 ];
 const ANIMAL_SOUNDS = [
   {animal:'🐱',name:'Cat',sound:'Meow',distractors:['Woof','Moo','Oink']},
@@ -663,6 +680,8 @@ const PATTERNS = [
   {seq:['⭐','⭐','💫','⭐','⭐'],answer:'💫'},
   {seq:['🟢','🟡','🟢','🟡'],answer:'🟢'},
   {seq:['🦋','🌸','🌸','🦋','🌸'],answer:'🌸'},
+  {seq:['🐰','🌸','🐰','🌸'],answer:'🐰'},
+  {seq:['🚀','🌍','🚀','🌍'],answer:'🚀'},
 ];
 const CVC_WORDS = [
   {word:'CAT',blank:1,letters:['A','O','U','E'],answer:'A'},
@@ -691,6 +710,9 @@ const GAMES_LIST = [
   {id:'wordbuilder',icon:'🔡',name:'Word Builder',desc:'Fill in the missing letter!',color:'#00B4D8',stars:3},
   {id:'memory',icon:'🧠',name:'Memory Match',desc:'Flip cards and find the pairs!',color:'#FF6B35',stars:3},
   {id:'compare',icon:'📏',name:'Bigger or Smaller',desc:'Which number is bigger?',color:'#FFD60A',stars:3},
+  {id:'uppercase',icon:'🔠',name:'Big & Small Letters',desc:'Match the big letter to the small one!',color:'#E91E8C',stars:3},
+  {id:'numorder',icon:'🔢',name:'Number Order',desc:'Tap the numbers in order 1, 2, 3...!',color:'#2DC653',stars:3},
+  {id:'firstletter',icon:'🔤',name:'First Letter',desc:'What letter does the picture start with?',color:'#7B2FBE',stars:3},
 ];
 
 const BADGES = [
@@ -699,7 +721,7 @@ const BADGES = [
   {id:'star20',emoji:'💫',name:'Superstar!',desc:'Earn 20 stars',req:20,unit:'stars'},
   {id:'activities5',emoji:'🎨',name:'Activity Champ',desc:'Complete 5 activities',req:5,unit:'activities'},
   {id:'games3',emoji:'🎮',name:'Game Player',desc:'Play 3 different games',req:3,unit:'games'},
-  {id:'allgames',emoji:'🏆',name:'Game Master!',desc:'Complete all 12 games',req:12,unit:'games'},
+  {id:'allgames',emoji:'🏆',name:'Game Master!',desc:'Complete all 15 games',req:15,unit:'games'},
   {id:'literacy',emoji:'📚',name:'Reading Star',desc:'Complete all literacy activities',req:8,unit:'literacy'},
   {id:'daily',emoji:'📅',name:'Daily Learner',desc:'Complete a full day schedule',req:1,unit:'daily'},
 ];
@@ -903,6 +925,9 @@ function renderGame() {
   else if(currentGame==='patterns') renderPatternGame();
   else if(currentGame==='wordbuilder') renderWordBuilderGame();
   else if(currentGame==='compare') renderCompareGame();
+  else if(currentGame==='uppercase') renderUppercaseGame();
+  else if(currentGame==='numorder') renderNumOrderGame();
+  else if(currentGame==='firstletter') renderFirstLetterGame();
 }
 
 // --- ABC GAME ---
@@ -916,6 +941,10 @@ function renderAbcGame() {
   const opts = shuffle(allOptions);
   const colors = ['#FF6B35','#00B4D8','#2DC653','#7B2FBE'];
 
+  // Build a lookup so every option shows its name, not just the correct one
+  const emojiNameMap = {};
+  LETTER_DATA.forEach(l => { emojiNameMap[l.emoji] = l.name; });
+
   let html = `
     <div class="score-display">Find the letter sound!</div>
     <div class="game-letter-display" style="background:${colors[gameRound%4]}">
@@ -926,8 +955,9 @@ function renderAbcGame() {
     <div class="options-grid">
   `;
   opts.forEach(emoji => {
+    const label = emojiNameMap[emoji] || '';
     html += `<button class="option-btn" onclick="checkAbcAnswer(this,'${emoji}','${q.emoji}')">
-      ${emoji}<span class="option-label">${emoji===q.emoji?q.name:''}</span>
+      ${emoji}<span class="option-label">${label}</span>
     </button>`;
   });
   html += '</div>';
@@ -961,7 +991,7 @@ function renderNumberGame() {
   let emojiHtml = '';
   for(let i=0;i<count;i++) emojiHtml+=`<span class="count-emoji">${emoji}</span>`;
   let html = `
-    <div class="game-question">How many ${emoji} do you see?</div>
+    <div style="font-size:52px;text-align:center;margin:4px 0 2px;">${emoji} 🔢 ?</div>
     <div class="emoji-count-area">${emojiHtml}</div>
     <div class="number-options">
   `;
@@ -1025,13 +1055,23 @@ function checkWordAnswer(btn,chosen,correct){
 // --- SHAPE GAME ---
 let shapeQuestions=[];
 function renderShapeGame(){
-  if(gameRound===0) shapeQuestions=[];
-  const correct=SHAPES[gameRound%SHAPES.length];
+  if(gameRound===0) {
+    // Build a 10-question list by repeating the 8 shapes and shuffling
+    shapeQuestions=shuffle([...SHAPES,...SHAPES]).slice(0,ROUNDS_PER_GAME);
+  }
+  const correct=shapeQuestions[gameRound];
   const others=SHAPES.filter(s=>s.name!==correct.name);
   const distractors=shuffle(others).slice(0,3);
   const opts=shuffle([correct,...distractors]);
+  // Show target shape in grey at top — child matches it visually, no reading needed
+  const targetSvg = correct.svg.replace(/FILL/g,'#888');
   let html=`
-    <div class="game-question">Tap the <strong>${correct.name}</strong>!</div>
+    <div style="text-align:center;margin-bottom:6px;font-size:26px;">👇</div>
+    <div style="display:flex;justify-content:center;margin-bottom:14px;">
+      <div style="width:110px;height:110px;background:#f0f0f0;border-radius:20px;padding:8px;border:3px dashed #ccc;">
+        <svg viewBox="0 0 120 120">${targetSvg}</svg>
+      </div>
+    </div>
     <div class="shape-options">
   `;
   opts.forEach(s=>{
@@ -1160,7 +1200,13 @@ function renderRhymeGame() {
     <div class="options-grid">
   `;
   opts.forEach(e => {
-    const name = e===q.rhyme ? q.rhymeName : '';
+    let name = '';
+    if(e === q.rhyme) {
+      name = q.rhymeName;
+    } else {
+      const di = q.distractors.indexOf(e);
+      if(di >= 0) name = q.distractorNames[di];
+    }
     html += `<button class="option-btn" onclick="checkRhymeAnswer(this,'${e}','${q.rhyme}')">
       ${e}<span class="option-label">${name}</span>
     </button>`;
@@ -1382,6 +1428,118 @@ function checkCompareAnswer(btn, chosen, correct) {
     btn.classList.add('wrong');
     allBtns.forEach(b=>{if(parseInt(b.textContent)===correct)b.classList.add('correct');});
     setTimeout(()=>{gameRound++;updateGameProgress();renderGame();},1200);
+  }
+}
+
+// ─── BIG & SMALL LETTERS ──────────────────────────────
+let uppercaseQuestions = [];
+function renderUppercaseGame() {
+  if(gameRound===0) uppercaseQuestions = shuffle([...LETTER_DATA]).slice(0, ROUNDS_PER_GAME);
+  const q = uppercaseQuestions[gameRound];
+  const distractors = shuffle(LETTER_DATA.filter(l => l.letter !== q.letter)).slice(0, 3);
+  const opts = shuffle([q, ...distractors]);
+  const colors = ['#FF6B35','#00B4D8','#2DC653','#7B2FBE'];
+  let html = `
+    <div class="game-letter-display" style="background:${colors[gameRound%4]};margin-bottom:10px;">
+      ${q.letter}
+    </div>
+    <div style="font-size:22px;text-align:center;margin-bottom:14px;">→ <strong style="font-size:28px;">?</strong></div>
+    <div class="lowercase-grid">
+  `;
+  opts.forEach(l => {
+    html += `<button class="lowercase-btn" onclick="checkUppercaseAnswer(this,'${l.letter}','${q.letter}')">
+      ${l.letter.toLowerCase()}
+    </button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+function checkUppercaseAnswer(btn, chosen, correct) {
+  const allBtns = btn.parentElement.querySelectorAll('.lowercase-btn');
+  allBtns.forEach(b => b.onclick = null);
+  if(chosen === correct) {
+    btn.classList.add('correct'); gameScore++;
+    document.getElementById('game-live-score').textContent = '⭐ ' + gameScore;
+    spawnConfettiAt();
+    setTimeout(() => { gameRound++; updateGameProgress(); renderGame(); }, 900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b => { if(b.textContent.trim() === correct.toLowerCase()) b.classList.add('correct'); });
+    setTimeout(() => { gameRound++; updateGameProgress(); renderGame(); }, 1200);
+  }
+}
+
+// ─── NUMBER ORDER ─────────────────────────────────────
+let numOrderProgress = 0, numOrderTotal = 0;
+function renderNumOrderGame() {
+  numOrderProgress = 1;
+  numOrderTotal = 5;
+  const nums = shuffle([1,2,3,4,5]);
+  let html = `
+    <div class="num-order-hint">1 → 2 → 3 → 4 → 5</div>
+    <div style="text-align:center;font-size:16px;font-weight:700;color:#aaa;margin-bottom:12px;">Tap in order! ☝️</div>
+    <div class="num-order-grid">
+  `;
+  nums.forEach(n => {
+    html += `<button class="num-order-btn" id="nob-${n}" onclick="tapNumOrder(${n})">${n}</button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+function tapNumOrder(n) {
+  if(n === numOrderProgress) {
+    const btn = document.getElementById('nob-' + n);
+    btn.classList.add('tapped');
+    btn.onclick = null;
+    numOrderProgress++;
+    if(numOrderProgress > numOrderTotal) {
+      gameScore++;
+      document.getElementById('game-live-score').textContent = '⭐ ' + gameScore;
+      spawnConfettiAt();
+      setTimeout(() => { gameRound++; updateGameProgress(); renderGame(); }, 900);
+    }
+  } else {
+    const btn = document.getElementById('nob-' + n);
+    btn.classList.add('wrong');
+    setTimeout(() => btn.classList.remove('wrong'), 500);
+  }
+}
+
+// ─── FIRST LETTER SOUND ───────────────────────────────
+let firstLetterQuestions = [];
+function renderFirstLetterGame() {
+  if(gameRound===0) firstLetterQuestions = shuffle([...LETTER_DATA]).slice(0, ROUNDS_PER_GAME);
+  const q = firstLetterQuestions[gameRound];
+  const allLetters = LETTER_DATA.map(l => l.letter);
+  const distractors = shuffle(allLetters.filter(l => l !== q.letter)).slice(0, 3);
+  const opts = shuffle([q.letter, ...distractors]);
+  const colors = ['#FF6B35','#00B4D8','#2DC653','#7B2FBE'];
+  let html = `
+    <div style="text-align:center;font-size:90px;margin:8px 0 4px;">${q.emoji}</div>
+    <div style="text-align:center;font-size:22px;font-weight:800;margin-bottom:18px;">${q.name}</div>
+    <div class="options-grid">
+  `;
+  opts.forEach((letter, i) => {
+    html += `<button class="option-btn" onclick="checkFirstLetterAnswer(this,'${letter}','${q.letter}')"
+      style="font-size:54px;font-weight:900;color:${colors[i]};">
+      ${letter}
+    </button>`;
+  });
+  html += '</div>';
+  document.getElementById('game-body').innerHTML = html;
+}
+function checkFirstLetterAnswer(btn, chosen, correct) {
+  const allBtns = btn.parentElement.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.onclick = null);
+  if(chosen === correct) {
+    btn.classList.add('correct'); gameScore++;
+    document.getElementById('game-live-score').textContent = '⭐ ' + gameScore;
+    spawnConfettiAt();
+    setTimeout(() => { gameRound++; updateGameProgress(); renderGame(); }, 900);
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b => { if(b.textContent.trim() === correct) b.classList.add('correct'); });
+    setTimeout(() => { gameRound++; updateGameProgress(); renderGame(); }, 1200);
   }
 }
 
