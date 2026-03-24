@@ -482,7 +482,10 @@ body{font-family:-apple-system,'SF Pro Rounded','Helvetica Neue',Arial,sans-seri
       <h2 id="game-title">Game</h2>
       <p id="game-subtitle">Round 1 of 10</p>
     </div>
-    <div id="game-live-score" style="font-size:16px;font-weight:800;color:var(--yellow)">⭐ 0</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="sound-toggle-btn" onclick="toggleSound()" style="background:none;border:none;font-size:26px;cursor:pointer;padding:2px;">🔊</button>
+      <div id="game-live-score" style="font-size:16px;font-weight:800;color:var(--yellow)">⭐ 0</div>
+    </div>
   </div>
   <div class="game-progress-bar"><div class="game-progress-fill" id="game-progress-fill" style="width:0%"></div></div>
   <div class="game-body" id="game-body"></div>
@@ -898,6 +901,29 @@ function loadGamesScreen() {
 }
 
 // ===================================================
+// SOUND / SPEECH
+// ===================================================
+let soundOn = true;
+function speak(text) {
+  if(!soundOn || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.88;
+  u.pitch = 1.15;
+  u.volume = 1;
+  // Prefer a child-friendly voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v => /Samantha|Karen|Moira|Fiona|Victoria|Allison|Ava/i.test(v.name));
+  if(preferred) u.voice = preferred;
+  window.speechSynthesis.speak(u);
+}
+function toggleSound() {
+  soundOn = !soundOn;
+  document.getElementById('sound-toggle-btn').textContent = soundOn ? '🔊' : '🔇';
+  if(!soundOn) window.speechSynthesis.cancel();
+}
+
+// ===================================================
 // GAME ENGINE
 // ===================================================
 let currentGame = null;
@@ -958,6 +984,7 @@ function renderAbcGame() {
     abcQuestions = shuffle([...LETTER_DATA]).slice(0,ROUNDS_PER_GAME);
   }
   const q = abcQuestions[gameRound];
+  speak('Find the picture that starts with ' + q.letter + '!');
   const allOptions = [q.emoji, ...q.distractors];
   const opts = shuffle(allOptions);
   const colors = ['#FF6B35','#00B4D8','#2DC653','#7B2FBE'];
@@ -1004,6 +1031,7 @@ function checkAbcAnswer(btn, chosen, correct) {
 // --- NUMBER COUNTING GAME ---
 const NUMBER_EMOJIS = ['🍎','🐝','⭐','🎈','🌸','🦋','🍭','🎸','🐸','🌻'];
 function renderNumberGame() {
+  speak('Count them and tap the right number!');
   const count = Math.floor(Math.random()*9)+1;
   const emoji = NUMBER_EMOJIS[gameRound%NUMBER_EMOJIS.length];
   const wrong = new Set([count]);
@@ -1043,6 +1071,7 @@ let swPool=[];
 function renderSightWordGame(){
   if(gameRound===0) swPool=shuffle([...SIGHT_WORDS]);
   const correct=swPool[gameRound%swPool.length];
+  speak('Find the word: ' + correct + '!');
   const pool=SIGHT_WORDS.filter(w=>w!==correct);
   const distractors=shuffle(pool).slice(0,3);
   const opts=shuffle([correct,...distractors]);
@@ -1081,6 +1110,7 @@ function renderShapeGame(){
     shapeQuestions=shuffle([...SHAPES,...SHAPES]).slice(0,ROUNDS_PER_GAME);
   }
   const correct=shapeQuestions[gameRound];
+  speak('Find the matching shape!');
   const others=SHAPES.filter(s=>s.name!==correct.name);
   const distractors=shuffle(others).slice(0,3);
   const opts=shuffle([correct,...distractors]);
@@ -1125,6 +1155,7 @@ function checkShapeAnswer(btn,chosen,correct){
 let colorSel=[];
 let colorMixesDone=0;
 function renderColorGame(){
+  speak('Pick two colors and mix them together!');
   colorSel=[];
   colorMixesDone=colorMixesDone||0;
   let html=`
@@ -1180,6 +1211,7 @@ function doMix(){
 // --- COUNTING / ADDITION GAME ---
 const ADD_EMOJIS=['🍎','🍭','⭐','🐝','🎈'];
 function renderCountingGame(){
+  speak('Count all of them and tap the answer!');
   const a=Math.floor(Math.random()*4)+1;
   const b=Math.floor(Math.random()*4)+1;
   const correct=a+b;
@@ -1211,6 +1243,7 @@ let rhymeQuestions = [];
 function renderRhymeGame() {
   if(gameRound===0) rhymeQuestions = shuffle([...RHYME_DATA]).slice(0, ROUNDS_PER_GAME);
   const q = rhymeQuestions[gameRound];
+  speak('Which one rhymes with ' + q.word + '?');
   const opts = shuffle([q.rhyme, ...q.distractors]);
   let html = `
     <div class="game-question">Which one rhymes with <strong>${q.word}</strong>?</div>
@@ -1255,6 +1288,7 @@ let animalQuestions = [];
 function renderAnimalSoundsGame() {
   if(gameRound===0) animalQuestions = shuffle([...ANIMAL_SOUNDS]).slice(0, ROUNDS_PER_GAME);
   const q = animalQuestions[gameRound];
+  speak('What sound does the ' + q.name + ' make?');
   const opts = shuffle([q.sound, ...q.distractors]);
   let html = `
     <div class="game-question">What sound does the <strong>${q.name}</strong> make?</div>
@@ -1290,6 +1324,7 @@ let patternQuestions = [];
 function renderPatternGame() {
   if(gameRound===0) patternQuestions = shuffle([...PATTERNS]).slice(0, ROUNDS_PER_GAME);
   const q = patternQuestions[gameRound];
+  speak('What comes next in the pattern?');
   const seq = [...q.seq, '?'];
   const allEmojis = [...new Set(q.seq)];
   while(allEmojis.length < 4) { const extras=['🔶','🟣','🟤','⬛']; allEmojis.push(extras[allEmojis.length-2]||'🔶'); }
@@ -1329,6 +1364,7 @@ let cvcQuestions = [];
 function renderWordBuilderGame() {
   if(gameRound===0) cvcQuestions = shuffle([...CVC_WORDS]).slice(0, ROUNDS_PER_GAME);
   const q = cvcQuestions[gameRound];
+  speak('What letter is missing in ' + q.word.split('').join(' ') + '?');
   const letters = q.word.split('');
   const opts = shuffle([...q.letters]);
   let tilesHtml = letters.map((l,i) => i===q.blank ?
@@ -1368,6 +1404,7 @@ function checkCvcAnswer(btn, chosen, correct, word) {
 let memCards = [], memFlipped = [], memMatched = 0, memLocked = false;
 function renderMemoryGame() {
   if(gameRound === 0) {
+    speak('Find all the matching pairs!');
     memMatched = 0; memFlipped = []; memLocked = false;
     const pairs = shuffle([...MEMORY_PAIRS, ...MEMORY_PAIRS]);
     memCards = pairs.map((e,i)=>({id:i,emoji:e,flipped:false,matched:false}));
@@ -1420,10 +1457,11 @@ function flipMemCard(idx) {
 
 // ─── BIGGER OR SMALLER ────────────────────────────────
 function renderCompareGame() {
+  const askBigger = gameRound % 2 === 0;
+  speak(askBigger ? 'Tap the bigger number!' : 'Tap the smaller number!');
   const a = Math.floor(Math.random()*9)+1;
   let b = a;
   while(b===a) b = Math.floor(Math.random()*9)+1;
-  const askBigger = gameRound % 2 === 0;
   const correct = askBigger ? Math.max(a,b) : Math.min(a,b);
   const opts = shuffle([a,b]);
   let html = `
@@ -1457,6 +1495,7 @@ let uppercaseQuestions = [];
 function renderUppercaseGame() {
   if(gameRound===0) uppercaseQuestions = shuffle([...LETTER_DATA]).slice(0, ROUNDS_PER_GAME);
   const q = uppercaseQuestions[gameRound];
+  speak('Big ' + q.letter + '! Find the small letter that matches!');
   const distractors = shuffle(LETTER_DATA.filter(l => l.letter !== q.letter)).slice(0, 3);
   const opts = shuffle([q, ...distractors]);
   const colors = ['#FF6B35','#00B4D8','#2DC653','#7B2FBE'];
@@ -1493,6 +1532,7 @@ function checkUppercaseAnswer(btn, chosen, correct) {
 // ─── NUMBER ORDER ─────────────────────────────────────
 let numOrderProgress = 0, numOrderTotal = 0;
 function renderNumOrderGame() {
+  speak('Tap the numbers in order! Start with 1!');
   numOrderProgress = 1;
   numOrderTotal = 5;
   const nums = shuffle([1,2,3,4,5]);
@@ -1531,6 +1571,7 @@ let firstLetterQuestions = [];
 function renderFirstLetterGame() {
   if(gameRound===0) firstLetterQuestions = shuffle([...LETTER_DATA]).slice(0, ROUNDS_PER_GAME);
   const q = firstLetterQuestions[gameRound];
+  speak(q.name + '! What letter does ' + q.name + ' start with?');
   const allLetters = LETTER_DATA.map(l => l.letter);
   const distractors = shuffle(allLetters.filter(l => l !== q.letter)).slice(0, 3);
   const opts = shuffle([q.letter, ...distractors]);
@@ -1568,6 +1609,7 @@ function checkFirstLetterAnswer(btn, chosen, correct) {
 let sizeOrderProgress = 0;
 const SIZE_ORDER_EMOJIS = ['🍎','🐝','⭐','🎈','🌸','🦋','🍭','🐸','🌻','🐱'];
 function renderSizeOrderGame() {
+  speak('Tap from smallest to biggest!');
   sizeOrderProgress = 1;
   const emoji = SIZE_ORDER_EMOJIS[gameRound % SIZE_ORDER_EMOJIS.length];
   const sizes = shuffle([
@@ -1628,6 +1670,7 @@ let sortQuestions = [];
 function renderSortGame() {
   if(gameRound===0) sortQuestions = shuffle([...SORT_ITEMS]).slice(0, ROUNDS_PER_GAME);
   const q = sortQuestions[gameRound];
+  speak('Is it an animal or food? Tap the right one!');
   let html = `
     <div class="sort-item-display">${q.emoji}</div>
     <div class="sort-btns">
@@ -1672,6 +1715,7 @@ let oddOutQuestions = [];
 function renderOddOneOutGame() {
   if(gameRound===0) oddOutQuestions = shuffle([...ODD_OUT_DATA]).slice(0, ROUNDS_PER_GAME);
   const q = oddOutQuestions[gameRound];
+  speak('Find the one that does not belong!');
   const opts = shuffle([...q.items]);
   // Show a visual hint: magnifying glass — no words needed
   let html = `
@@ -1704,6 +1748,8 @@ function checkOddAnswer(btn, chosen, correct) {
 function showGameWin(){
   const starsEarned = Math.ceil((gameScore/ROUNDS_PER_GAME)*3);
   const msgs = ['Amazing work!','You\'re so smart!','Incredible!','Superstar!'];
+  const msg = msgs[Math.floor(Math.random()*msgs.length)];
+  speak(msg + ' You earned ' + starsEarned + (starsEarned===1?' star':' stars') + '!');
   state.stars += starsEarned;
   if(!state.gamesCompleted.includes(currentGame)) state.gamesCompleted.push(currentGame);
   saveState();
